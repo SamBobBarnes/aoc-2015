@@ -70,6 +70,54 @@ void day2_part1() {
 
 void day2_part2() {
     print_header(2, 2);
+    const char *input = day2_input.input;
+    const size_t len = strlen(input);
+
+    char temp[3] = "  ";
+    int tempi = 0;
+
+    int length = 0;
+    int width = 0;
+    int height = 0;
+
+    int total = 0;
+
+    for (int i = 0; i < len; ++i) {
+        if (input[i] == 'x') {
+            if (length == 0) {
+                length = atoi(temp);
+                reset_temp(temp, &tempi);
+            } else if (width == 0) {
+                width = atoi(temp);
+
+                reset_temp(temp, &tempi);
+            }
+        } else if (input[i] == '\n') {
+            height = atoi(temp);
+            reset_temp(temp, &tempi);
+
+            int min = INT_MAX;
+            if ((length + width) * 2 < min) min = (length + width) * 2;
+            if ((height + width) * 2 < min) min = (height + width) * 2;
+            if ((length + height) * 2 < min) min = (length + height) * 2;
+
+            int local_total = length * width * height + min;
+            total += local_total;
+            // printf("\n%ix%ix%i - 2*%iL*%iW + 2*%iW*%iH + 2*%iH*%iL + %i = %i\n", length, width, height, length, width,
+            //        width,
+            //        height, height, length, min, local_total);
+
+            length = 0;
+            width = 0;
+        } else {
+            // printf("Before: %s",temp);
+            temp[tempi] = input[i];
+            tempi++;
+            // printf("After: %s",temp);
+        }
+    }
+
+    printf("We will need %i ft of ribbon.", total);
 }
 
 IDay day2 = {
