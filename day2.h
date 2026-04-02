@@ -7,7 +7,8 @@
 
 #include "iday.h"
 
-void day2_run();
+void day2_part1();
+void day2_part2();
 
 extern IDay day2;
 
