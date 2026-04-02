@@ -21,8 +21,8 @@ void day2_part1() {
     const char *input = day2_input.input;
     const size_t len = strlen(input);
 
-    char temp[2] = "  ";
-    int tempi = 1;
+    char temp[3] = "  ";
+    int tempi = 0;
 
     int length = 0;
     int width = 0;
