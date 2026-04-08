@@ -12,4 +12,7 @@ add_executable(aoc_2015 main.c
         day1.c
         days.h
         day2.h
-        day2.c)
+        day2.c
+        day3.c
+        day3.h
+        Inputs/day3.h)

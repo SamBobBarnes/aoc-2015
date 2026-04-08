@@ -6,4 +6,5 @@
 #define AOC_2015_DAYS_H
 #include "day1.h"
 #include "day2.h"
+#include "day3.h"
 #endif //AOC_2015_DAYS_H
