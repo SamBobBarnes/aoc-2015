@@ -16,7 +16,7 @@ struct House {
 
 void day3_part1() {
     print_header(2, 1);
-    const char *input = day3_input.test_input;
+    const char *input = day3_input.input;
     const size_t len = strlen(input);
 
     int x = 0;
@@ -24,14 +24,16 @@ void day3_part1() {
 
     struct House houses[len + 1];
     houses[0].count = 1;
+    houses[0].x = 0;
+    houses[0].y = 0;
     for (int i = 1; i < len + 1; ++i) {
         houses[i].x = INT_MAX;
         houses[i].y = INT_MAX;
         houses[i].count = 0;
     }
 
-    for (int j = 0; j < len + 1; ++j)
-        printf("[%i,%i]: %i\n", houses[j].x, houses[j].y, houses[j].count);
+    // for (int j = 0; j < len + 1; ++j)
+    //     printf("[%i,%i]: %i\n", houses[j].x, houses[j].y, houses[j].count);
 
     for (int i = 0; i < len; ++i) {
         switch (input[i]) {
@@ -51,10 +53,10 @@ void day3_part1() {
                 printf("TILT");
                 break;
         }
-        printf("[%i,%i] i: %i\n", x, y, i);
+        // printf("[%i,%i] i: %i\n", x, y, i);
         int visited_house_index = -1;
 
-        for (int j = 0; j < len; ++j) {
+        for (int j = 0; j < len + 1; ++j) {
             if (houses[j].x == x && houses[j].y == y) {
                 visited_house_index = j;
                 break;
@@ -72,7 +74,7 @@ void day3_part1() {
 
     int total_houses_visited = 0;
     for (int j = 0; j < len + 1; ++j) {
-        printf("[%i,%i]: %i\n", houses[j].x, houses[j].y, houses[j].count);
+        // printf("[%i,%i]: %i\n", houses[j].x, houses[j].y, houses[j].count);
         if (houses[j].count > 0) {
             total_houses_visited++;
         }
