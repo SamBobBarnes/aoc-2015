@@ -65,7 +65,7 @@ void day7_part1() {
         }
         if (input[i] == '\n') {
             // process line
- if (strcmp(line[3], "") == 0) {
+            if (strcmp(line[3], "") == 0) {
                 // wire
                 gates[i].label[0] = line[2][0];
                 gates[i].label[1] = line[2][1];
