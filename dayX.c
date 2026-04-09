@@ -3,6 +3,7 @@
 //
 
 #include "dayX.h"
+#include "Inputs/dayX.h"
 
 void dayX_part1() {
     print_header(X, 1);
