@@ -5,14 +5,18 @@
 #include "dayX.h"
 #include "Inputs/dayX.h"
 
+#include <string.h>
+
 void dayX_part1() {
     print_header(X, 1);
     const char *input = dayX_input.test_input;
+    const size_t len = strlen(input);
 }
 
 void dayX_part2() {
     print_header(X, 2);
     const char *input = dayX_input.test_input;
+    const size_t len = strlen(input);
 }
 
 IDay dayX = {
