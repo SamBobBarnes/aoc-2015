@@ -14,7 +14,7 @@ void day5_part1() {
 
     int total = 0;
     for (int i = 0; i < len; i += 17) {
-        char word[16] = "";
+        char word[17] = "\0";
         bool double_letter = false;
         bool forbidden_pairs = false;
         int vowels = 0;
@@ -53,7 +53,46 @@ void day5_part1() {
 
 void day5_part2() {
     print_header(5, 2);
-    const char *input = day5_input.test_input;
+    const char *input = day5_input.input;
+    const size_t len = strlen(input);
+
+    int total = 0;
+    for (int i = 0; i < len; i += 17) {
+        char word[17] = "\0";
+        bool duplicate_pair = false;
+        bool letter_straddle = false;
+        char pairs[15][2];
+        for (int j = 0; j < 16; j++) {
+            word[j] = input[i + j];
+            if (j < 15) {
+                pairs[j][0] = input[i + j];
+                pairs[j][1] = input[i + j + 1];
+            }
+            // find letter straddle
+            if (j < 14 && input[i + j] == input[i + j + 2])
+                letter_straddle = true;
+        }
+
+        // search for duplicate pairs
+        for (int j = 0; j < 13; j++) {
+            for (int k = j + 2; k < 15; k++) {
+                // printf("j:%i, k:%i [%c,%c][%c,%c]\n", j, k, pairs[j][0], pairs[j][1], pairs[k][0], pairs[k][1]);
+                if (pairs[j][0] == pairs[k][0] && pairs[j][1] == pairs[k][1]) {
+                    duplicate_pair = true;
+                    break;
+                }
+            }
+            if (duplicate_pair)
+                break;
+        }
+
+        // printf("%s\ndp: %d\nls: %d\n-------\n", word, duplicate_pair, letter_straddle);
+
+        if (letter_straddle && duplicate_pair)
+            total++;
+    }
+
+    printf("There are %i nice strings", total);
 }
 
 IDay day5 = {
