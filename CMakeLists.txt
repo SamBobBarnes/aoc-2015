@@ -15,4 +15,6 @@ add_executable(aoc_2015 main.c
         day2.c
         day3.c
         day3.h
-        Inputs/day3.h)
+        Inputs/day3.h
+        day4.h
+        day4.c)
