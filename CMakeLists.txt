@@ -7,7 +7,7 @@ add_executable(aoc_2015 main.c
         Inputs/day1.h
         Inputs/day1.h
         Inputs/iinput.h
-        iday.h
+        helpers.h
         day1.h
         day1.c
         days.h

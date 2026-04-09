@@ -6,7 +6,7 @@
 #define AOC_2015_DAY3_H
 
 
-#include "iday.h"
+#include "helpers.h"
 
 void day3_part1();
 

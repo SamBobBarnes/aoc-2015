@@ -5,7 +5,7 @@
 #ifndef AOC_2015_DAY1_H
 #define AOC_2015_DAY1_H
 
-#include "iday.h"
+#include "helpers.h"
 
 void day1_run();
 

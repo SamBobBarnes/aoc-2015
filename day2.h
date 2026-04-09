@@ -5,7 +5,7 @@
 #ifndef AOC_2015_DAY2_H
 #define AOC_2015_DAY2_H
 
-#include "iday.h"
+#include "helpers.h"
 
 void day2_part1();
 void day2_part2();

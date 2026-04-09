@@ -10,12 +10,29 @@
 
 typedef struct {
     void (*part1)();
+
     void (*part2)();
 } IDay;
 
-static void print_header(int day, int part) {
+static void print_header(const int day, const int part) {
     printf("\n--------------\n");
     printf("Day %i Part %i", day, part);
+    printf("\n--------------\n");
+}
+
+struct Point {
+    int x;
+    int y;
+};
+
+static struct Point new_point(const int x, const int y) {
+    struct Point p;
+    p.x = x;
+    p.y = y;
+    return p;
+}
+
+static void print_spacer() {
     printf("\n--------------\n");
 }
 
