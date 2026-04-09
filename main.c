@@ -5,7 +5,7 @@
 int main(void) {
     printf("\nAdvent of Code 2015 in C\n");
 
-    constexpr int day = 6;
+    constexpr int day = 7;
     IDay day_to_run;
     switch (day) {
         case 1:
@@ -25,6 +25,9 @@ int main(void) {
             break;
         case 6:
             day_to_run = day6;
+            break;
+        case 7:
+            day_to_run = day7;
             break;
         default:
             return 1;

@@ -10,4 +10,5 @@
 #include "day4.h"
 #include "day5.h"
 #include "day6.h"
+#include "day7.h"
 #endif //AOC_2015_DAYS_H
