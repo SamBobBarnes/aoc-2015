@@ -4,9 +4,6 @@ project(aoc_2015 C)
 set(CMAKE_C_STANDARD 23)
 
 add_executable(aoc_2015 main.c
-        Inputs/day1.h
-        Inputs/day1.h
-        Inputs/iinput.h
         helpers.h
         day1.h
         day1.c
@@ -15,8 +12,10 @@ add_executable(aoc_2015 main.c
         day2.c
         day3.c
         day3.h
-        Inputs/day3.h
         day4.h
         day4.c
+        day5.h
+        day5.c
         libs/md5.h
-        libs/md5.c)
+        libs/md5.c
+)
