@@ -16,6 +16,8 @@ add_executable(aoc_2015 main.c
         day4.c
         day5.h
         day5.c
+        day6.h
+        day6.c
         libs/md5.h
         libs/md5.c
 )

@@ -23,6 +23,9 @@ int main(void) {
         case 5:
             day_to_run = day5;
             break;
+        case 6:
+            day_to_run = day6;
+            break;
         default:
             return 1;
     }
