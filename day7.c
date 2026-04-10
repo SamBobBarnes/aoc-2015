@@ -42,7 +42,11 @@ uint16_t process_gate(struct Gate *gate) {
 
     int value;
     switch (gate->operation) {
-        case AND: value = process_gate(gate->a_ptr) & process_gate(gate->b_ptr);
+        case AND:
+            if (gate->a_ptr == nullptr)
+                value = gate->value & process_gate(gate->b_ptr);
+            else
+                value = process_gate(gate->a_ptr) & process_gate(gate->b_ptr);
             break;
         case OR: value = process_gate(gate->a_ptr) | process_gate(gate->b_ptr);
             break;
@@ -52,16 +56,24 @@ uint16_t process_gate(struct Gate *gate) {
             break;
         case RSHIFT: value = process_gate(gate->a_ptr) >> gate->value;
             break;
-        default: value = gate->value;
+        default:
+            if (gate->a_ptr != nullptr)
+                value = process_gate(gate->a_ptr);
+            else
+                value = gate->value;
     }
 
     gate->result = value;
     return value;
 }
 
+bool is_num(const char c) {
+    return c >= 48 && c <= 57;
+}
+
 void day7_part1() {
     print_header(7, 1);
-    const char *input = day7_input.test_input;
+    const char *input = day7_input.input;
     const size_t len = strlen(input);
 
 #pragma region Gate Init
@@ -78,9 +90,11 @@ void day7_part1() {
         gates[i].a[0] = '\0';
         gates[i].a[1] = '\0';
         gates[i].a[2] = '\0';
+        gates[i].a_ptr = nullptr;
         gates[i].b[0] = '\0';
         gates[i].b[1] = '\0';
         gates[i].b[2] = '\0';
+        gates[i].b_ptr = nullptr;
         gates[i].operation = 0;
         gates[i].value = 0;
         gates[i].result = -1;
@@ -147,7 +161,12 @@ void day7_part1() {
             gates[i].label[0] = line[2][0];
             gates[i].label[1] = line[2][1];
             gates[i].operation = WIRE;
-            gates[i].value = atoi(line[0]);
+            if (is_num(line[0][0])) // has value
+                gates[i].value = atoi(line[0]);
+            else {
+                gates[i].a[0] = line[0][0];
+                gates[i].a[1] = line[0][1];
+            }
         } else if (strcmp(line[0], "NOT") == 0) {
             // not
             gates[i].label[0] = line[3][0];
@@ -160,8 +179,12 @@ void day7_part1() {
             gates[i].label[0] = line[4][0];
             gates[i].label[1] = line[4][1];
             gates[i].operation = AND;
-            gates[i].a[0] = line[0][0];
-            gates[i].a[1] = line[0][1];
+            if (is_num(line[0][0])) // has value
+                gates[i].value = atoi(line[0]);
+            else {
+                gates[i].a[0] = line[0][0];
+                gates[i].a[1] = line[0][1];
+            }
             gates[i].b[0] = line[2][0];
             gates[i].b[1] = line[2][1];
         } else if (strcmp(line[1], "OR") == 0) {
@@ -197,20 +220,22 @@ void day7_part1() {
     for (int i = 0; i < gate_count; i++) {
         struct Gate *gate = &gates[i];
 
-        if (strcmp(gate->a, "") == 0) continue; //skip wires
-        gate->a_ptr = get_gate(gate->a, gates, gate_count);
+        if (strcmp(gate->a, "") != 0)
+            gate->a_ptr = get_gate(gate->a, gates, gate_count);
 
-        if (strcmp(gate->b, "") == 0) continue; // dont assign b on not or shift
-        gate->b_ptr = get_gate(gate->b, gates, gate_count);
+        if (strcmp(gate->b, "") != 0)
+            gate->b_ptr = get_gate(gate->b, gates, gate_count);
     }
 #pragma endregion
 
-    printf("The value of d = %i\n", process_gate(&gates[2]));
-    printf("The value of e = %i\n", process_gate(&gates[3]));
-    printf("The value of f = %i\n", process_gate(&gates[4]));
-    printf("The value of g = %i\n", process_gate(&gates[5]));
-    printf("The value of h = %i\n", process_gate(&gates[6]));
-    printf("The value of i = %i\n", process_gate(&gates[7]));
+    // printf("The value of d = %i\n", process_gate(&gates[2]));
+    // printf("The value of e = %i\n", process_gate(&gates[3]));
+    // printf("The value of f = %i\n", process_gate(&gates[4]));
+    // printf("The value of g = %i\n", process_gate(&gates[5]));
+    // printf("The value of h = %i\n", process_gate(&gates[6]));
+    // printf("The value of i = %i\n", process_gate(&gates[7]));
+    struct Gate *a = get_gate("a", gates, gate_count);
+    printf("The value of a = %i\n", process_gate(a));
 }
 
 void day7_part2() {
