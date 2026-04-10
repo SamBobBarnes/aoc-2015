@@ -9,8 +9,11 @@
 
 void day8_part1() {
     print_header(8, 1);
-    const char *input = day8_input.test_input;
-    const size_t len = strlen(input);
+    // const char *input = day8_input.test_input;
+    size_t len = 0;
+ const char *input = read_text_file("Inputs/day8.txt", &len);
+
+    printf("%s", input);
 }
 
 void day8_part2() {
