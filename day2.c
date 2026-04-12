@@ -3,6 +3,8 @@
 //
 #include "day2.h"
 #include "Inputs/day2.h"
+
+#include <limits.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
