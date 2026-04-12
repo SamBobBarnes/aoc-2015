@@ -7,11 +7,24 @@
 
 #include <string.h>
 
-struct Route {
-    char *src;
-    char *dest;
-    int dist;
+struct Node {
+    int id;
+    char* name;
+    int link_count;
+    struct Link* links;
 };
+
+struct Link {
+    int dest;
+    int distance;
+};
+
+int get_city(const struct Node* cities, const int city_count, const char* name) {
+    for (int i = 0; i < city_count; i++)
+        if (strcmp(cities[i].name, name) == 0)
+            return i;
+    return -1;
+}
 
 void day9_part1() {
     print_header(9, 1);
@@ -52,25 +65,46 @@ void day9_part1() {
     }
 #pragma endregion
 
-    struct Route routes[row_count];
+    struct Node cities[row_count];
+    int city_count = 0;
 
     for (int i = 0; i < row_count; i++) {
         char *ptr = strtok(rows[i], " ");
-        int j = 0;
-        while (ptr != NULL) {
-            if (j == 0)
-                routes[i].src = ptr;
-            else if (j == 2)
-                routes[i].dest = ptr;
-            else if (j == 4)
-                routes[i].dist = atoi(ptr);
-            ptr = strtok(nullptr, " ");
-            j++;
+        char *city1 = ptr;
+        int c1_index = get_city(cities, city_count, city1);
+        if (c1_index == -1) {
+            cities[city_count].id = city_count;
+            cities[city_count].name = city1;
+            cities[city_count].link_count = 0;
+            cities[city_count].links = nullptr;
+            c1_index = city_count;
+            city_count++;
         }
+        ptr = strtok(nullptr, " ");
+        ptr = strtok(nullptr, " ");
+        char *city2 = ptr;
+        int c2_index = get_city(cities, city_count, city2);
+        if (c2_index == -1) {
+            cities[city_count].id = city_count;
+            cities[city_count].name = city2;
+            cities[city_count].link_count = 0;
+            cities[city_count].links = nullptr;
+            c2_index = city_count;
+            city_count++;
+        }
+        ptr = strtok(nullptr, " ");
+        ptr = strtok(nullptr, " ");
+
+        int dist = atoi(ptr);
+        //todo: update list of links
+
     }
 
     for (int i = 0; i < row_count; i++)
-        printf("%s\n%s -- %i -> %s\n", rows[i], routes[i].src, routes[i].dist, routes[i].dest);
+        printf("%s -- %i -> %s\n", routes[i].src, routes[i].dist, routes[i].dest);
+
+
+
     // use Dijkstra
 }
 

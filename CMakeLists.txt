@@ -26,4 +26,6 @@ add_executable(aoc_2015 main.c
         day9.c
         libs/md5.h
         libs/md5.c
+        day9-pq.h
+        day9-pq.c
 )
