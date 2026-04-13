@@ -4,6 +4,7 @@
 
 #ifndef AOC_2015_IDAY_H
 #define AOC_2015_IDAY_H
+#include <stdarg.h>
 #include <stdio.h>
 
 #include "Inputs/iinput.h"
@@ -34,6 +35,15 @@ static struct Point new_point(const int x, const int y) {
 
 static void print_spacer() {
     printf("\n--------------\n");
+}
+
+static void print_ln(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    vprintf(format, args);
+    va_end(args);
+    printf("\n");
 }
 
 #endif //AOC_2015_IDAY_H

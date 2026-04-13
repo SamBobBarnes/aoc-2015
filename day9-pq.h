@@ -6,7 +6,7 @@
 #define AOC_2015_DAY9_PQ_H
 
 // Define maximum size of the priority queue
-#define MAX 100
+#define MAX 1000
 
 typedef struct {
     int visited_ids[8];

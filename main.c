@@ -1,9 +1,17 @@
 ﻿#include <stdio.h>
+#include <string.h>
+
 #include "helpers.h"
 #include "days.h"
+#include "debug.h"
 
-int main(void) {
+int main(const int argc, char *argv[]) {
     printf("\nAdvent of Code 2015 in C\n");
+
+    if (argc > 1 && strcmp(argv[1], "debug") == 0) {
+        printf("Debugging...\n");
+        debugging = true;
+    }
 
     constexpr int day = 9;
     IDay day_to_run;
