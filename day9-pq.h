@@ -8,10 +8,15 @@
 // Define maximum size of the priority queue
 #define MAX 100
 
+typedef struct {
+    int visited_ids[8];
+    int visited_count;
+} History;
 
 typedef struct {
     int priority;
     int id;
+    History visited;
 } ItemPriority;
 
 // Define PriorityQueue structure

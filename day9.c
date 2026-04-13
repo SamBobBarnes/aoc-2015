@@ -7,19 +7,29 @@
 
 #include <string.h>
 
-struct Node {
-    int id;
-    char* name;
-    int link_count;
-    struct Link* links;
-};
+#include "day9-pq.h"
 
-struct Link {
+
+typedef struct Link {
     int dest;
     int distance;
-};
+} Link;
 
-int get_city(const struct Node* cities, const int city_count, const char* name) {
+typedef struct Node {
+    int id;
+    char *name;
+    int link_count;
+    Link links[8];
+} Node;
+
+typedef struct Route {
+    int src_id;
+    int dest_id;
+    int distance;
+} Route;
+
+
+int get_city(const Node *cities, const int city_count, const char *name) {
     for (int i = 0; i < city_count; i++)
         if (strcmp(cities[i].name, name) == 0)
             return i;
@@ -65,7 +75,7 @@ void day9_part1() {
     }
 #pragma endregion
 
-    struct Node cities[row_count];
+    Node cities[row_count];
     int city_count = 0;
 
     for (int i = 0; i < row_count; i++) {
@@ -76,11 +86,10 @@ void day9_part1() {
             cities[city_count].id = city_count;
             cities[city_count].name = city1;
             cities[city_count].link_count = 0;
-            cities[city_count].links = nullptr;
             c1_index = city_count;
             city_count++;
         }
-        ptr = strtok(nullptr, " ");
+        strtok(nullptr, " ");
         ptr = strtok(nullptr, " ");
         char *city2 = ptr;
         int c2_index = get_city(cities, city_count, city2);
@@ -88,24 +97,87 @@ void day9_part1() {
             cities[city_count].id = city_count;
             cities[city_count].name = city2;
             cities[city_count].link_count = 0;
-            cities[city_count].links = nullptr;
             c2_index = city_count;
             city_count++;
         }
-        ptr = strtok(nullptr, " ");
+        strtok(nullptr, " ");
         ptr = strtok(nullptr, " ");
 
         int dist = atoi(ptr);
-        //todo: update list of links
-
+        cities[c1_index].links[cities[c1_index].link_count].dest = cities[c2_index].id;
+        cities[c1_index].links[cities[c1_index].link_count].distance = dist;
+        cities[c1_index].link_count++;
+        cities[c2_index].links[cities[c2_index].link_count].dest = cities[c1_index].id;
+        cities[c2_index].links[cities[c2_index].link_count].distance = dist;
+        cities[c2_index].link_count++;
     }
 
-    for (int i = 0; i < row_count; i++)
-        printf("%s -- %i -> %s\n", routes[i].src, routes[i].dist, routes[i].dest);
-
+    for (int i = 0; i < city_count; i++)
+        for (int j = 0; j < cities[i].link_count; j++)
+            printf("%s(%i) to %s(%i) in %i\n", cities[i].name, cities[i].id, cities[cities[i].links[j].dest].name,
+                   cities[i].links[j].dest, cities[i].links[j].distance);
 
 
     // use Dijkstra
+
+    int route_count = 0;
+    for (int i = 0; i < city_count - 1; i++)
+        for (int j = i + 1; j < city_count; j++)
+            route_count++;
+    Route routes[route_count];
+
+    int route_index = 0;
+
+    for (int i = 0; i < city_count - 1; i++)
+        for (int j = i + 1; j < city_count; j++) {
+            printf("%s(%i) to %s(%i) in ", cities[i].name, cities[i].id, cities[cities[i].links[j].dest].name,
+                   cities[i].links[j].dest);
+            routes[route_index].src_id = i;
+            routes[route_index].dest_id = i;
+            routes[route_index].distance = INT_MAX;
+
+            PriorityQueue q = {{(ItemPriority){0, i, (History){{0}, 0}}}, 1};
+            while (peek(&q).id != -1) {
+                ItemPriority ip = dequeue(&q);
+                Node *city = &cities[ip.id];
+                if (city->id == routes[route_index].dest_id) {
+                    routes[route_index].distance = ip.priority;
+                    break;
+                }
+                History node_history = ip.visited;
+                node_history.visited_ids[node_history.visited_count] = city->id;
+                node_history.visited_count++;
+
+                for (int k = 0; k < city->link_count; k++) {
+                    Link *link = &city->links[k];
+                    bool already_visited = false;
+                    // if link is dest, and we are not on the last step
+                    if (link->dest == routes[route_index].dest_id && node_history.visited_count != city_count - 1)
+                        already_visited = true;
+                    // if link has been visited in this route
+                    for (int l = 0; l < node_history.visited_count; l++) {
+                        if (link->dest == node_history.visited_ids[l]) already_visited = true;
+                    }
+                    if (already_visited) continue;
+
+                    enqueue(&q, (ItemPriority){ip.priority + link->distance, link->dest, node_history});
+                }
+            }
+
+            printf("%i\n", routes[route_index].distance);
+
+            route_index++;
+        }
+
+    // all shortest routes have been found
+    // now find the shortest of those routes
+    int min = INT_MAX;
+
+    for (int i = 0; i < route_count; i++) {
+        if (routes[i].distance < min) min = routes[i].distance;
+    }
+
+    printf("The shortest route to visit each city is %i units long", min);
 }
 
 void day9_part2() {

@@ -58,8 +58,7 @@ void heapifyDown(PriorityQueue *pq, const int index) {
 ItemPriority dequeue(PriorityQueue *pq) {
     if (!pq->size) {
         printf("Priority queue is empty\n");
-        ItemPriority error = {-1, -1};
-        return error;
+        return (ItemPriority){-1, -1};
     }
 
     ItemPriority item = pq->items[0];
@@ -72,8 +71,7 @@ ItemPriority dequeue(PriorityQueue *pq) {
 ItemPriority peek(const PriorityQueue *pq) {
     if (!pq->size) {
         printf("Priority queue is empty\n");
-        ItemPriority error = {-1, -1};
-        return error;
+        return (ItemPriority){-1, -1};
     }
     return pq->items[0];
 }
