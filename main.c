@@ -13,7 +13,7 @@ int main(const int argc, char *argv[]) {
         debugging = true;
     }
 
-    constexpr int day = 9;
+    constexpr int day = 10;
     IDay day_to_run;
     switch (day) {
         case 1:
@@ -42,6 +42,9 @@ int main(const int argc, char *argv[]) {
             break;
         case 9:
             day_to_run = day9;
+            break;
+        case 10:
+            day_to_run = day10;
             break;
         default:
             return 1;
