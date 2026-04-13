@@ -15,7 +15,8 @@ void swap(ItemPriority *a, ItemPriority *b) {
 // during insertion
 void heapifyUp(PriorityQueue *pq, const int index) {
     if (index
-        && pq->items[(index - 1) / 2].priority > pq->items[index].priority) {
+        && ((!pq->inverse && pq->items[(index - 1) / 2].priority > pq->items[index].priority) || (
+                pq->inverse && pq->items[(index - 1) / 2].priority < pq->items[index].priority))) {
         swap(&pq->items[(index - 1) / 2],
              &pq->items[index]);
         heapifyUp(pq, (index - 1) / 2);
@@ -41,11 +42,13 @@ void heapifyDown(PriorityQueue *pq, const int index) {
     int right = 2 * index + 2;
 
     if (left < pq->size
-        && pq->items[left].priority < pq->items[smallest].priority)
+        && ((!pq->inverse && pq->items[left].priority < pq->items[smallest].priority) || (
+                pq->inverse && pq->items[left].priority > pq->items[smallest].priority)))
         smallest = left;
 
     if (right < pq->size
-        && pq->items[right].priority < pq->items[smallest].priority)
+        && ((!pq->inverse && pq->items[right].priority < pq->items[smallest].priority) || (
+                pq->inverse && pq->items[right].priority > pq->items[smallest].priority)))
         smallest = right;
 
     if (smallest != index) {

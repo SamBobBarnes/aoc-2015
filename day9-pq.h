@@ -23,6 +23,7 @@ typedef struct {
 typedef struct {
     ItemPriority items[MAX];
     int size;
+    bool inverse;
 } PriorityQueue;
 
 void enqueue(PriorityQueue *pq, ItemPriority value);
