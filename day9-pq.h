@@ -8,14 +8,22 @@
 // Define maximum size of the priority queue
 #define MAX 100
 
+
+typedef struct {
+    int priority;
+    int id;
+} ItemPriority;
+
 // Define PriorityQueue structure
 typedef struct {
-    int items[MAX];
+    ItemPriority items[MAX];
     int size;
 } PriorityQueue;
 
-void enqueue(PriorityQueue* pq, int value);
-int dequeue(PriorityQueue* pq);
-int peek(const PriorityQueue* pq);
+void enqueue(PriorityQueue *pq, ItemPriority value);
+
+ItemPriority dequeue(PriorityQueue *pq);
+
+ItemPriority peek(const PriorityQueue *pq);
 
 #endif //AOC_2015_DAY9_PQ_H
