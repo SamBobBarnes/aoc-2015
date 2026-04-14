@@ -9,86 +9,130 @@
 
 #include "debug.h"
 
+typedef struct {
+    int count;
+    char number;
+} Run;
+
+void print_run(const Run *r) {
+    printf("(c: %i, n: %c, s: '", r->count, r->number);
+    for (int i = 0; i < r->count; i++) {
+        printf("%c", r->number);
+    }
+    printf("')\n");
+}
+
+void decode_run(const Run *r, char string[2]) {
+    sprintf(string, "%d%c", r->count, r->number);
+}
+
+int encode_run(Run *r, const char string[2]) {
+    if (string[0] == string[1]) {
+        r->number = string[0];
+        r->count = 2;
+        return 1;
+    } else {
+        r[0].number = string[0];
+        r[0].count = 1;
+        r[1].number = string[1];
+        r[1].count = 2;
+        return 2;
+    }
+}
+
+void copy_next_back(Run *prev, int *prev_len, Run *next, int *next_len) {
+    for (int i = 0; i < *next_len; i++) {
+        prev[i].number = next[i].number;
+        prev[i].count = next[i].count;
+    }
+    *prev_len = *next_len;
+    *next_len = 0;
+}
+
+void reduce_runs(Run *prev, int *prev_len, Run *next, int *next_len) {
+    copy_next_back(prev, prev_len, next, next_len);
+    int next_i = 0;
+    for (int i = 0; i < *prev_len - 1; i++) {
+        if (prev[i].number == prev[i + 1].number) {
+            next[next_i].number = prev[i].number;
+            next[next_i++].count = prev[i].count + prev[i + 1].count;
+            i++;
+        } else {
+            next[next_i].number = prev[i].number;
+            next[next_i++].count = prev[i].count;
+        }
+    }
+
+    //catch last if it was not reduced
+    if (prev[*prev_len - 1].number != prev[*prev_len - 2].number) {
+        next[next_i].number = prev[*prev_len - 1].number;
+        next[next_i++].count = prev[*prev_len - 1].count;
+    }
+}
+
+int sum_runs(const Run *prev, const int prev_len) {
+    int total = 0;
+    for (int i = 0; i < prev_len; i++)
+        total += prev[i].count;
+    return total;
+}
+
+size_t calculate(const char *input, const int reps) {
+    Run prev[10000] = {1, input[0]};
+    int prev_len = 1;
+    int prev_i = 0;
+
+    const size_t len = strlen(input);
+    for (int i = 1; i < len; i++) {
+        if (prev[prev_i].number == input[i]) prev[prev_i].count++;
+        else {
+            prev[++prev_i].number = input[i];
+            prev[prev_i].count = 1;
+            prev_len++;
+        }
+    }
+    if (debugging)
+        for (int i = 0; i < prev_len; i++)
+            print_run(&prev[i]);
+
+    Run next[10000] = {0, '0'};
+    int next_len = 0;
+    int next_i = 0;
+
+    for (int r = 0; r < reps; r++) {
+        for (int i = 0; i < prev_len; i++) {
+            char string[2];
+            decode_run(&prev[i], &string[0]);
+            const int encoded_count = encode_run(&next[next_i++], string);
+            if (encoded_count > 1) next_i++;
+        }
+        next_len = next_i;
+
+        reduce_runs(prev, &prev_len, next, &next_len);
+        copy_next_back(prev, &prev_len, next, &next_len);
+
+        if (debugging) {
+            printf("\n");
+            for (int i = 0; i < prev_len; i++)
+                print_run(&prev[i]);
+        }
+    }
+
+    return sum_runs(prev, prev_len);
+}
+
 void day10_part1() {
     print_header(10, 1);
     const char *input = day10_input.input;
 
-    char prev[1000000] = {'\0'};
-    char next[1000000] = {'\0'};
-    strcpy(prev, input);
-
-    int reps = 40;
-    for (int r = 0; r < reps; r++) {
-        size_t len = strlen(prev);
-        debug("%llu\n", len);
-        int run_len = 1;
-        char run_char = prev[0];
-
-        for (int i = 1; i < len; i++) {
-            if (prev[i] == run_char) run_len++;
-            else {
-                char run_len_string[5] = {'\0'};
-                itoa(run_len, run_len_string, 10);
-                strcat(next, run_len_string);
-                char run_char_string[2] = {run_char, '\0'};
-                strcat(next, run_char_string);
-                run_len = 1;
-                run_char = prev[i];
-            }
-        }
-
-        char run_len_string[5] = {'\0'};
-        itoa(run_len, run_len_string, 10);
-        strcat(next, run_len_string);
-        char run_char_string[2] = {run_char, '\0'};
-        strcat(next, run_char_string);
-        strcpy(prev, next);
-        for (int i = 0; i < strlen(next); i++) next[i] = '\0';
-    }
-
-    printf("%llu", strlen(prev));
+    printf("%llu", calculate(input, 40));
 }
 
 void day10_part2() {
     print_header(10, 2);
     const char *input = day10_input.input;
-    const size_t len = strlen(input);
 
-    // need to compress this somehow
-    char prev[2000000] = {'\0'};
-    char next[2000000] = {'\0'};
-    strcpy(prev, input);
-
-    int reps = 50;
-    for (int r = 0; r < reps; r++) {
-        size_t len = strlen(prev);
-        debug("%i - %llu\n", r, len);
-        int run_len = 1;
-        char run_char = prev[0];
-
-        for (int i = 1; i < len; i++) {
-            if (prev[i] == run_char) run_len++;
-            else {
-                char run_len_string[5] = {'\0'};
-                itoa(run_len, run_len_string, 10);
-                strcat(next, run_len_string);
-                char run_char_string[2] = {run_char, '\0'};
-                strcat(next, run_char_string);
-                run_len = 1;
-                run_char = prev[i];
-            }
-        }
-
-        char run_len_string[5] = {'\0'};
-        itoa(run_len, run_len_string, 10);
-        strcat(next, run_len_string);
-        char run_char_string[2] = {run_char, '\0'};
-        strcat(next, run_char_string);
-        strcpy(prev, next);
-        for (int i = 0; i < strlen(next); i++) next[i] = '\0';
-    }
-
-    printf("%llu", strlen(prev));
+    printf("%llu", calculate(input, 50));
 }
 
 IDay day10 = {
