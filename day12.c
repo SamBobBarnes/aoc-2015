@@ -50,6 +50,7 @@ void day12_part1() {
 }
 
 int reds = 0;
+int red_finds = 0;
 
 int recurse(int *i, const char *json, const size_t len, const int depth) {
     int total = 0;
@@ -69,7 +70,10 @@ int recurse(int *i, const char *json, const size_t len, const int depth) {
             (*i)++;
             break;
         }
-        if (*i < len - 3 && json[*i] == 'r' && json[*i + 1] == 'e' && json[*i + 2] == 'd' && container == '{') {
+        if (*i < len - 6 && json[*i] == ':' && json[*i + 1] == '"' && json[*i + 2] == 'r' && json[*i + 3] == 'e' && json
+            [*i + 4] == 'd' && json
+            [*i + 5] == '"' && container == '{') {
+            red_finds++;
             red = true;
         }
         if ((val >= 48 && val <= 57) || val == '-') reading_num = true;
@@ -120,6 +124,7 @@ void day12_part2() {
 
     // 82040 < x < 121920
     print_ln("reds: %i", reds);
+    print_ln("red_finds: %i", red_finds);
     print_ln("The sum of all numbers is %i", total);
 
     if (!test) {
