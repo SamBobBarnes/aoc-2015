@@ -14,6 +14,8 @@ typedef struct {
     char number;
 } Run;
 
+#define RUN_ARRAY_LEN 100000
+
 void print_run(const Run *r) {
     printf("(c: %i, n: %c, s: '", r->count, r->number);
     for (int i = 0; i < r->count; i++) {
@@ -31,16 +33,16 @@ int encode_run(Run *r, const char string[2]) {
         r->number = string[0];
         r->count = 2;
         return 1;
-    } else {
-        r[0].number = string[0];
-        r[0].count = 1;
-        r[1].number = string[1];
-        r[1].count = 2;
-        return 2;
     }
+
+    r[0].number = string[0];
+    r[0].count = 1;
+    r[1].number = string[1];
+    r[1].count = 1;
+    return 2;
 }
 
-void copy_next_back(Run *prev, int *prev_len, Run *next, int *next_len) {
+void copy_next_back(Run *prev, int *prev_len, const Run *next, int *next_len) {
     for (int i = 0; i < *next_len; i++) {
         prev[i].number = next[i].number;
         prev[i].count = next[i].count;
@@ -68,6 +70,7 @@ void reduce_runs(Run *prev, int *prev_len, Run *next, int *next_len) {
         next[next_i].number = prev[*prev_len - 1].number;
         next[next_i++].count = prev[*prev_len - 1].count;
     }
+    *next_len = next_i;
 }
 
 int sum_runs(const Run *prev, const int prev_len) {
@@ -78,7 +81,7 @@ int sum_runs(const Run *prev, const int prev_len) {
 }
 
 size_t calculate(const char *input, const int reps) {
-    Run prev[10000] = {1, input[0]};
+    Run prev[RUN_ARRAY_LEN] = {1, input[0]};
     int prev_len = 1;
     int prev_i = 0;
 
@@ -95,11 +98,12 @@ size_t calculate(const char *input, const int reps) {
         for (int i = 0; i < prev_len; i++)
             print_run(&prev[i]);
 
-    Run next[10000] = {0, '0'};
+    Run next[RUN_ARRAY_LEN] = {0, '0'};
     int next_len = 0;
     int next_i = 0;
 
     for (int r = 0; r < reps; r++) {
+        next_i = 0;
         for (int i = 0; i < prev_len; i++) {
             char string[2];
             decode_run(&prev[i], &string[0]);
@@ -111,11 +115,12 @@ size_t calculate(const char *input, const int reps) {
         reduce_runs(prev, &prev_len, next, &next_len);
         copy_next_back(prev, &prev_len, next, &next_len);
 
-        if (debugging) {
-            printf("\n");
-            for (int i = 0; i < prev_len; i++)
-                print_run(&prev[i]);
-        }
+        debug_ln("%i: %i", r, prev_len);
+        // if (debugging) {
+        //     print_spacer();
+        //     for (int i = 0; i < prev_len; i++)
+        //         print_run(&prev[i]);
+        // }
     }
 
     return sum_runs(prev, prev_len);
