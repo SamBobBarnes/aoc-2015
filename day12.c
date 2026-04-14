@@ -49,8 +49,20 @@ void day12_part1() {
 
 void day12_part2() {
     print_header(12, 2);
-    const char *input = day12_input.test_input;
+    bool test = true;
+    char *input = nullptr;
+    if (test)
+        input = day12_input.test_input;
+    else {
+        input = read_file("../Inputs/day12.txt"); // disregard the first 3 chars
+        input = input + 3;
+    }
     const size_t len = strlen(input);
+
+    if (!test) {
+        input = input - 3;
+        free(input);
+    }
 }
 
 IDay day12 = {
