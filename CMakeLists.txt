@@ -5,9 +5,9 @@ set(CMAKE_C_STANDARD 23)
 
 add_executable(aoc_2015 main.c
         helpers.h
+        days.h
         day1.h
         day1.c
-        days.h
         day2.h
         day2.c
         day3.c
@@ -28,6 +28,34 @@ add_executable(aoc_2015 main.c
         day10.c
         day11.h
         day11.c
+        day12.h
+        day12.c
+        day13.h
+        day13.c
+        day14.h
+        day14.c
+        day15.h
+        day15.c
+        day16.h
+        day16.c
+        day17.h
+        day17.c
+        day18.h
+        day18.c
+        day19.h
+        day19.c
+        day20.h
+        day20.c
+        day21.h
+        day21.c
+        day22.h
+        day22.c
+        day23.h
+        day23.c
+        day24.h
+        day24.c
+        day25.h
+        day25.c
         libs/md5.h
         libs/md5.c
         day9-pq.h
