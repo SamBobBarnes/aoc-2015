@@ -9,6 +9,14 @@
 
 #include "debug.h"
 
+
+typedef struct {
+    int id;
+    int happiness;
+    int neighbor;
+} HappinessModifier;
+
+
 int index_of_person(char arr[][20], const size_t len, const char *string_to_find) {
     for (int i = 0; i < len; i++) {
         if (strcmp(arr[i], string_to_find) == 0) return i;
@@ -17,15 +25,65 @@ int index_of_person(char arr[][20], const size_t len, const char *string_to_find
     return -1;
 }
 
-typedef struct {
-    int id;
-    int happiness;
-    int neighbor;
-} HappinessModifier;
+int calc_happiness(const int *table, const int table_len, const HappinessModifier *modifiers, const int modifier_len) {
+    int happiness = 0;
+    for (int i = 0; i < table_len; i++) {
+        const int *z;
+        if (i == 0) z = &table[table_len - 1];
+        else z = &table[i - 1];
+        const int *a = &table[i];
+        const int *b;
+        if (i == table_len - 1) b = &table[0];
+        else b = &table[i + 1];
+
+        for (int j = 0; j < modifier_len; j++) {
+            if (modifiers[j].id == *a && modifiers[j].neighbor == *b || modifiers[j].id == *a && modifiers[j].neighbor
+                == *z) {
+                happiness += modifiers[j].happiness;
+            }
+        }
+    }
+    return happiness;
+}
+
+bool id_in_table(const int *table, const int table_len, const int id) {
+    for (int i = 0; i < table_len; i++) {
+        if (table[i] == id) return true;
+    }
+    return false;
+}
+
+int recurse_table_placements(int *table, const int table_index, const int table_len, const HappinessModifier *modifiers,
+                             const int mod_len, const int depth) {
+    int max = 0;
+    debug_ln("d: %i, ti: %i", depth, table_index);
+    for (int i = 0; i < table_len; i++) {
+        if (!id_in_table(table, table_index + 1, i)) {
+            table[table_index] = i;
+            int value;
+            if (depth == table_len - 1) {
+                if (debugging) {
+                    for (int j = 0; j < table_len; j++) {
+                        printf("%i, ", table[j]);
+                    }
+                }
+                value = calc_happiness(table, table_len, modifiers, mod_len);
+                if (debugging) {
+                    printf("\ntotal: %i", value);
+                    print_spacer();
+                }
+            } else {
+                value = recurse_table_placements(table, table_index + 1, table_len, modifiers, mod_len, depth + 1);
+            }
+            if (max < value) max = value;
+        }
+    }
+    return max;
+}
 
 void day13_part1() {
     print_header(13, 1);
-    const char *input = day13_input.test_input;
+    const char *input = day13_input.input;
 #pragma region Split Input into rows
     const size_t len = strlen(input);
     int row_count = 0;
@@ -108,9 +166,14 @@ void day13_part1() {
             debug_ln("%s(%i) would gain %i happiness units by sitting next to %s(%i)", persons[modifiers[i].id],
                      modifiers[i].id, modifiers[i].happiness, persons[modifiers[i].neighbor], modifiers[i].neighbor);
         }
+        print_spacer();
     }
 
     int table_placements[persons_len];
+
+    const int max_happiness = recurse_table_placements(table_placements, 0, persons_len, modifiers, modifier_len, 0);
+
+    printf("max happiness: %i\n", max_happiness);
 }
 
 void day13_part2() {
