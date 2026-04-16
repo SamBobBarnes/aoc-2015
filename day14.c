@@ -108,7 +108,7 @@ int get_current_dist(const Reindeer *reindeer, const int sec) {
 
 void day14_part2() {
     print_header(14, 2);
-    const char *input = day14_input.test_input;
+    const char *input = day14_input.input;
 
 #pragma region Split Input into rows
     size_t len = strlen(input);
@@ -146,8 +146,8 @@ void day14_part2() {
 #pragma endregion
 
     int max = 0;
-    int seconds = 1000;
-    // int seconds = 2503;
+    // int seconds = 1000;
+    int seconds = 2503;
     Reindeer reindeer[row_count];
     int distances[row_count];
     int scores[row_count];
@@ -173,7 +173,6 @@ void day14_part2() {
     }
 #pragma endregion
     for (int sec = 1; sec <= seconds; sec++) {
-        int leader = -1;
         int max_dist = 0;
         for (int i = 0; i < row_count; i++) {
             distances[i] = get_current_dist(&reindeer[i], sec);
@@ -181,10 +180,16 @@ void day14_part2() {
         for (int i = 0; i < row_count; i++) {
             if (distances[i] > max_dist) {
                 max_dist = distances[i];
-                leader = i;
             }
         }
-        scores[leader]++;
+        for (int i = 0; i < row_count; i++) {
+            if (distances[i] == max_dist) {
+                scores[i]++;
+            }
+        }
+        // for (int i = 0; i < row_count; i++) {
+        //     debug_ln("%s has %i points after %i seconds; d: %i", reindeer[i].name, scores[i], sec, distances[i]);
+        // }
     }
     for (int i = 0; i < row_count; i++) {
         if (max < scores[i]) max = scores[i];
