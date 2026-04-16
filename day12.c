@@ -4,9 +4,8 @@
 
 #include "day12.h"
 #include "Inputs/day12.h"
-
+#include "libs/json.h"
 #include <string.h>
-
 #include "debug.h"
 
 void day12_part1() {
@@ -52,64 +51,53 @@ void day12_part1() {
 int reds = 0;
 int red_finds = 0;
 
-int recurse(int *i, const char *json, const size_t len, const int depth) {
-    int total = 0;
-    bool red = false;
-    char container = *i != 0 ? json[(*i) - 1] : 'r';
-
-    bool reading_num = false;
-    char num[10] = {'\0'};
-    int num_i = 0;
-    while (*i < len) {
-        const char val = json[*i];
-        if (val == '{' || val == '[') {
-            (*i)++;
-            total += recurse(i, json, len, depth + 1);
-        }
-        if (val == '}' || val == ']') {
-            (*i)++;
-            break;
-        }
-        if (*i < len - 6 && json[*i] == ':' && json[*i + 1] == '"' && json[*i + 2] == 'r' && json[*i + 3] == 'e' && json
-            [*i + 4] == 'd' && json
-            [*i + 5] == '"' && container == '{') {
-            red_finds++;
-            red = true;
-        }
-        if ((val >= 48 && val <= 57) || val == '-') reading_num = true;
-        else if (reading_num) {
-            int num_val = atoi(num);
-            total += num_val;
-            reading_num = false;
-            for (int j = 0; j < 10; j++) {
-                num[j] = '\0';
+int recurse(const struct json_value_s *json, enum json_type_e enclosing_type) {
+    switch (json->type) {
+        case json_type_array:
+            const struct json_array_s *arr = (struct json_array_s *) json->payload;
+            const struct json_array_element_s *arr_elem = arr->start;
+            int arr_total = 0;
+            while (arr_elem != NULL) {
+                arr_total += recurse(arr_elem->value, json_type_array);
+                arr_elem = arr_elem->next;
             }
-            num_i = 0;
-        }
-        if (reading_num) {
-            num[num_i++] = val;
-        }
+            return arr_total; // arrays are totaled up
+        case json_type_object:
+            const struct json_object_s *obj = (struct json_object_s *) json->payload;
+            const struct json_object_element_s *elem = obj->start;
+            int obj_total = 0;
+            while (elem != NULL) {
+                const int value = recurse(elem->value, json_type_object);
+                if (value < 0)
+                    return 0;
+                // if value is less than one, an obj in this obj contains the string "red" and this object is not valid;
+                obj_total += value; // else we total up the obj
+                elem = elem->next;
+            }
+            return obj_total;
+        case json_type_true:
+        case json_type_false:
+        case json_type_null:
+            return 0; // booleans dont matter
+        case json_type_string:
+            if (enclosing_type == json_type_array) {
+                return 0; // strings directly in arrays dont matter
+            }
+            const struct json_string_s *str = (struct json_string_s *) json->payload;
 
-        (*i)++;
+            if (strcmp(str->string, "red") == 0)
+                return -1; // return -1 if object value is red
+            return 0;
+        case json_type_number:
+            return atoi(((struct json_number_s *) json->payload)->number); // return numbers to total up
+        default:
+            exit(1);
     }
-
-    char spacer[200] = {'\0'};
-    for (int j = 0; j < depth; j++)
-        spacer[j] = ' ';
-
-    if (red) {
-        debug_ln(RED "%s%c d: %i, t: %i" RESET, spacer, container, depth, total, red);
-        reds++;
-        return 0;
-    }
-    debug_ln("%s%c d: %i, t: %i", spacer, container, depth, total, red);
-
-    return total;
 }
 
 void day12_part2() {
     print_header(12, 2);
-    bool test = false;
+    bool test = true;
     char *input = nullptr;
     if (test)
         input = day12_input.test_input;
@@ -119,14 +107,14 @@ void day12_part2() {
     }
     const size_t len = strlen(input);
 
-    int i = 0;
-    const int total = recurse(&i, input, len, 0);
+    struct json_value_s *json = json_parse(input, len);
+
+    const int total = recurse(json, json_type_object);
 
     // 82040 < x < 121920
-    print_ln("reds: %i", reds);
-    print_ln("red_finds: %i", red_finds);
     print_ln("The sum of all numbers is %i", total);
 
+    free(json);
     if (!test) {
         input = input - 3;
         free(input);

@@ -62,4 +62,5 @@ add_executable(aoc_2015 main.c
         day9-pq.c
         debug.h
         debug.c
+        libs/json.h
 )
