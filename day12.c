@@ -68,17 +68,12 @@ int recurse(const struct json_value_s *json, enum json_type_e enclosing_type) {
             int obj_total = 0;
             while (elem != NULL) {
                 const int value = recurse(elem->value, json_type_object);
-                if (value < 0)
-                    return 0;
+                if (value == -1) return 0;
                 // if value is less than one, an obj in this obj contains the string "red" and this object is not valid;
                 obj_total += value; // else we total up the obj
                 elem = elem->next;
             }
             return obj_total;
-        case json_type_true:
-        case json_type_false:
-        case json_type_null:
-            return 0; // booleans dont matter
         case json_type_string:
             if (enclosing_type == json_type_array) {
                 return 0; // strings directly in arrays dont matter
@@ -91,13 +86,13 @@ int recurse(const struct json_value_s *json, enum json_type_e enclosing_type) {
         case json_type_number:
             return atoi(((struct json_number_s *) json->payload)->number); // return numbers to total up
         default:
-            exit(1);
+            return 0;
     }
 }
 
 void day12_part2() {
     print_header(12, 2);
-    bool test = true;
+    bool test = false;
     char *input = nullptr;
     if (test)
         input = day12_input.test_input;
@@ -111,7 +106,7 @@ void day12_part2() {
 
     const int total = recurse(json, json_type_object);
 
-    // 82040 < x < 121920
+    // x == 96852
     print_ln("The sum of all numbers is %i", total);
 
     free(json);
