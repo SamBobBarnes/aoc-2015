@@ -58,6 +58,10 @@ add_executable(aoc_2015 main.c
         day25.c
         libs/md5.h
         libs/md5.c
+        libs/itertools/itertools.h
+        libs/itertools/itertools.c
+        libs/itertools/ll.h
+        libs/itertools/ll.c
         day9-pq.h
         day9-pq.c
         debug.h
