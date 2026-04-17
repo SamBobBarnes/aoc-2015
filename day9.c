@@ -5,6 +5,7 @@
 #include "day9.h"
 #include "Inputs/day9.h"
 
+#include <limits.h>
 #include <math.h>
 #include <stdint.h>
 #include <string.h>
