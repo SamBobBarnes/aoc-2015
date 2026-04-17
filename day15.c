@@ -30,35 +30,40 @@ int calculate_cookie_value(const int a, const int b, const int c, const int d, c
         flavor += c * ingredients[2].flavor + d * ingredients[3].flavor;
         texture += c * ingredients[2].texture + d * ingredients[3].texture;
     }
+    if (capacity < 0) capacity = 0;
+    if (durability < 0) durability = 0;
+    if (flavor < 0) flavor = 0;
+    if (texture < 0) texture = 0;
     return capacity * durability * flavor * texture;
 }
 
-int recurse_ingredients(const Ingredient *ingredients, const int ingredient_count, const int a, const int b,
-                        const int c, const int d) {
-    if (a + b + c + d == 100) {
-        const int value = calculate_cookie_value(a, b, c, d, ingredients, ingredient_count);
-        debug_ln("[%i,%i,%i,%i]=%i", a, b, c, d, value);
-        return value;
-    }
-    const int cookie1 = recurse_ingredients(ingredients, ingredient_count, a + 1, b, c, d);
-    const int cookie2 = recurse_ingredients(ingredients, ingredient_count, a, b + 1, c, d);
-    int cookie3 = 0;
-    int cookie4 = 0;
-    if (ingredient_count > 2) {
-        cookie3 = recurse_ingredients(ingredients, ingredient_count, a, b, c + 1, d);
-        cookie4 = recurse_ingredients(ingredients, ingredient_count, a, b, c, d + 1);
-    }
+int recurse_ingredients(const Ingredient *ingredients, const int ingredient_count) {
     int max = 0;
-    if (cookie1 > max) max = cookie1;
-    if (cookie2 > max) max = cookie2;
-    if (cookie3 > max) max = cookie3;
-    if (cookie4 > max) max = cookie4;
+    for (int a = 0; a <= 100; a++)
+        for (int b = 0; b <= 100; b++) {
+            if (ingredient_count > 2) {
+                for (int c = 0; c <= 100; c++)
+                    for (int d = 0; d <= 100; d++)
+                        if (a + b + c + d == 100) {
+                            const int value = calculate_cookie_value(a, b, c, d, ingredients, ingredient_count);
+                            // debug_ln("[%i,%i,%i,%i]=%i", a, b, c, d, value);
+                            if (value > max) max = value;
+                        }
+            } else {
+                if (a + b == 100) {
+                    const int value = calculate_cookie_value(a, b, 0, 0, ingredients, ingredient_count);
+                    debug_ln("[%i,%i]=%i", a, b, value);
+                    if (value > max) max = value;
+                }
+            }
+        }
+
     return max;
 }
 
 void day15_part1() {
     print_header(15, 1);
-    const char *input = day15_input.test_input;
+    const char *input = day15_input.input;
     const size_t len = strlen(input);
 
     int row_count = 0;
@@ -104,29 +109,34 @@ void day15_part1() {
         ingredients[i].name = name;
         strtok(nullptr, " ");
         char *capacity = strtok(nullptr, " ");
+        strtok(nullptr, " ");
         size_t capacity_len = strlen(capacity);
         capacity[capacity_len - 1] = '\0';
         ingredients[i].capacity = atoi(capacity);
-        strtok(nullptr, " ");
         char *durability = strtok(nullptr, " ");
-        size_t durability_len = strlen(capacity);
+        strtok(nullptr, " ");
+        size_t durability_len = strlen(durability);
         durability[durability_len - 1] = '\0';
         ingredients[i].durability = atoi(durability);
-        strtok(nullptr, " ");
         char *flavor = strtok(nullptr, " ");
-        size_t flavor_len = strlen(capacity);
+        strtok(nullptr, " ");
+        size_t flavor_len = strlen(flavor);
         flavor[flavor_len - 1] = '\0';
         ingredients[i].flavor = atoi(flavor);
-        strtok(nullptr, " ");
         char *texture = strtok(nullptr, " ");
-        size_t texture_len = strlen(capacity);
+        strtok(nullptr, " ");
+        size_t texture_len = strlen(texture);
         texture[texture_len - 1] = '\0';
         ingredients[i].texture = atoi(texture);
-        strtok(nullptr, " ");
         ingredients[i].calories = atoi(strtok(nullptr, " "));
     }
 
-    int max = recurse_ingredients(ingredients, row_count, 0, 0, 0, 0);
+    for (int i = 0; i < row_count; i++) {
+        debug_ln("%s: c: %i, r: %i, d: %i, f: %i, t: %i", ingredients[i].name, ingredients[i].capacity,
+                 ingredients[i].durability, ingredients[i].flavor, ingredients[i].texture);
+    }
+
+    int max = recurse_ingredients(ingredients, row_count);
 
     print_ln("Best cookie is %i", max);
 }
