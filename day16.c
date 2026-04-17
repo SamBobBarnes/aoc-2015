@@ -9,8 +9,17 @@
 
 void day16_part1() {
     print_header(16, 1);
-    const char *input = day16_input.test_input;
+    const char *input = day16_input.input;
     const size_t len = strlen(input);
+
+
+    int max_row_size = 0;
+    int row_count = GetRowCount(input, len, &max_row_size);
+    char rows[row_count][max_row_size];
+    SplitIntoRows(input, len, &row_count, &max_row_size, rows);
+    for (int i = 0; i < row_count; i++) {
+        printf("%s\n", rows[i]);
+    }
 }
 
 void day16_part2() {

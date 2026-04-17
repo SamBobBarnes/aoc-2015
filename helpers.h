@@ -55,4 +55,46 @@ static void print_ln(const char *format, ...) {
     printf("\n");
 }
 
+static void free_ptr(void *ptr) {
+    free(*(void **) ptr);
+}
+
+static int GetRowCount(const char *input, const size_t len, int *max_row_size) {
+    int index_of_last_newline = -1;
+    int row_count = 0;
+    for (int i = 0; i < len; i++)
+        if (input[i] == '\n') {
+            row_count++;
+            int row_len = i - index_of_last_newline;
+            if (row_len > *max_row_size) *max_row_size = row_len;
+            index_of_last_newline = i;
+        }
+    if (input[len - 1] != '\n') row_count++;
+
+    return row_count;
+}
+
+static void SplitIntoRows(const char *input, const size_t len, const int *row_count, const int *max_row_size,
+                          char rows[][*max_row_size]) {
+    int row_lengths[*row_count];
+    int current_row = 0;
+    int row_index = 0;
+
+    for (int i = 0; i < len; i++) {
+        if (input[i] == '\n') {
+            rows[current_row][row_index] = '\0';
+            row_lengths[current_row] = row_index;
+            row_index = 0;
+            current_row++;
+            continue;
+        }
+        rows[current_row][row_index] = input[i];
+        row_index++;
+    }
+    if (input[len - 1] != '\n') {
+        rows[current_row][row_index] = '\0';
+        row_lengths[current_row] = row_index;
+    }
+}
+
 #endif //AOC_2015_IDAY_H
