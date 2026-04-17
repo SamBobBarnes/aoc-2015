@@ -4,6 +4,7 @@
 
 #include "day17.h"
 #include "Inputs/day17.h"
+#include "libs/itertools/itertools.h"
 
 #include <string.h>
 
@@ -39,34 +40,6 @@ bool contains(const Box **boxes, const int box_count, const Box *box) {
     return false;
 }
 
-void recurse_boxes(const Box **boxes, const int box_count, Box boxes_used[box_count], const int box_used_count,
-                   int ***combinations, int **combination_counts, int *total, const int goal) {
-    int total_volume = total_vol(&boxes_used, box_count);
-    if (total_volume > goal) return; // if goal exceeded return
-    if (total_volume == goal) {
-        // if goal met
-        for (int i = 0; i < *total; i++) {
-            // if an identical set is found, dont double count return
-            int boxids_used[box_used_count];
-            for (int j = 0; j < box_used_count; j++) boxids_used[j] = boxes_used[j].id;
-            if (identical_arrays(combinations[i], *combination_counts[i], (int **) &boxids_used, box_used_count))
-                return;
-        }
-        for (int i = 0; i < box_used_count; i++) {
-            // finally, write to combinations and add to total
-            *combinations[*total][i] = boxes_used[i].id;
-        }
-        *combination_counts[*total] = box_used_count;
-        (*total)++;
-    }
-
-    for (int i = 0; i < box_count; i++) {
-        if (contains(&boxes_used, box_used_count, boxes[i])) continue; // if box already in set, continue to the next
-        boxes_used[box_used_count] = *boxes[i];
-        recurse_boxes(boxes, box_count, boxes_used, box_used_count + 1, combinations, combination_counts, total,
-                      goal); // recurse
-    }
-}
 
 void day17_part1() {
     print_header(17, 1);
@@ -88,17 +61,20 @@ void day17_part1() {
         boxes[box_count++].volume = atoi(ptr);
         ptr = strtok(nullptr, ",");
     }
-
-    int *combinations[20 * 20][box_count];
-    int combination_counts[20 * 20];
-    Box boxes_used[20];
-    int box_used_count = 0;
-
     int total;
 
-    recurse_boxes((Box **) &boxes, box_count, boxes_used, box_used_count, (int ***) combinations,
-                  (int **) &combination_counts, &total, goal);
-    print_ln("%i", total);
+    iter *i = newArrayIter(&boxes, box_count, 8);
+    combinations(boxes, box_count, 8, 8);
+    int *c;
+    while (has_next(i)) {
+        c = (int *) next(i);
+        for (int j = 0; j < box_count; j++) {
+            printf("%d,", c[j]);
+        }
+        printf("\n");
+    }
+
+    // print_ln("%i", total);
 }
 
 void day17_part2() {
