@@ -82,11 +82,79 @@ void day17_part1() {
     print_ln("%i", total);
 }
 
+int count_boxes(const long current, const int box_count) {
+    int total = 0;
+    for (int i = 0; i < box_count; i++) {
+        if ((current & (long) pow(2, i)) > 0) total++;
+    }
+
+    return total;
+}
+
 
 void day17_part2() {
     print_header(17, 2);
-    const char *input = day17_input.test_input;
+    const char *input = day17_input.input;
     const size_t len = strlen(input);
+
+    char line[len + 1];
+    strcpy(line, input);
+
+    Box boxes[20];
+    int box_count = 0;
+
+    int goal = 150;
+
+    char *ptr = strtok(line, ",");
+    while (ptr != NULL) {
+        boxes[box_count].id = box_count;
+        boxes[box_count++].volume = atoi(ptr);
+        ptr = strtok(nullptr, ",");
+    }
+    int total = 0;
+
+    //sort list
+
+    bool sorted = false;
+    while (!sorted) {
+        bool switched = false;
+
+        for (int i = 1; i < box_count; i++) {
+            if (boxes[i - 1].volume > boxes[i].volume) {
+                int a_vol = boxes[i - 1].volume;
+                int b_vol = boxes[i].volume;
+                boxes[i - 1].volume = b_vol;
+                boxes[i].volume = a_vol;
+                switched = true;
+            }
+        }
+
+        if (!switched) sorted = true;
+    }
+
+
+    for (int i = 0; i < box_count; i++) {
+        debug_ln("%i", boxes[i].volume);
+    }
+
+    int totals[box_count];
+
+    for (int i = 0; i < box_count; i++) totals[i] = 0;
+
+    for (long i = 0; i < pow(2, box_count); i++) {
+        if (get_total(i, boxes, box_count) == goal) {
+            int count = count_boxes(i, box_count);
+            totals[count]++;
+        }
+    }
+
+    for (int i = 0; i < box_count; i++)
+        if (totals[i] > 0) {
+            total = totals[i];
+            break;
+        }
+
+    print_ln("%i", total);
 }
 
 IDay day17 = {
