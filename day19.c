@@ -39,13 +39,14 @@ void day19_part1() {
 
     char *sut = rows[row_count - 1];
     size_t sut_len = strlen(sut);
-    char possibles[row_count][max_row_size * 10];
+    char possibles[row_count * 10][max_row_size * 2];
     int possible_count = 0;
 
+    for (int i = 0; i < row_count * 10; i++) possibles[i][0] = '\0';
+
     for (int i = 0; i < row_count - 3; i++) {
-        bool found = false;
         char temp[max_row_size * 2];
-        int index = -1;
+        int index;
 
         int space_index = index_of(rows[i], " ", 0);
         char search_string[4];
@@ -53,6 +54,8 @@ void day19_part1() {
         size_t search_len = strlen(search_string);
         char *replacement_string = &rows[i][space_index + 4];
         size_t replacement_len = strlen(replacement_string);
+
+        debug_ln("%s:", search_string);
 
         int offset = 0;
         do {
@@ -63,6 +66,10 @@ void day19_part1() {
             strncpy(temp, sut, index);
             strcpy(&temp[index], replacement_string);
             strncpy(&temp[index + replacement_len], &sut[index + search_len], sut_len - index - search_len);
+
+            if (debugging) {
+                printf("%i,", index);
+            }
 
             bool duplicate = false;
             for (int j = 0; j < possible_count; j++) {
