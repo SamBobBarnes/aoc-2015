@@ -31,7 +31,7 @@ void day18_part1() {
     SplitIntoRows(input, len, &row_count, &row_width, rows);
 
     bool grid[row_width][row_count];
-
+    row_width--;
     for (int x = 0; x < row_width; x++) {
         for (int y = 0; y < row_count; y++) {
             grid[x][y] = rows[y][x] == '#';
@@ -40,16 +40,27 @@ void day18_part1() {
 
     print_grid(row_count, row_width, grid);
 
-    int rounds = 100;
+    constexpr int rounds = 100;
 
     for (int i = 0; i < rounds; i++) {
-        print_spacer();
+        if (debugging) {
+            print_spacer();
+        }
 
         bool temp_grid[row_width][row_count];
         for (int x = 0; x < row_width; x++) {
             for (int y = 0; y < row_count; y++) {
                 int total = 0;
-                bool on = grid[x][y];
+                const bool on = grid[x][y];
+
+                bool tl = grid[x - 1][y - 1];
+                bool t = grid[x][y - 1];
+                bool tr = grid[x + 1][y - 1];
+                bool r = grid[x + 1][y];
+                bool br = grid[x + 1][y + 1];
+                bool b = grid[x][y + 1];
+                bool bl = grid[x - 1][y + 1];
+                bool l = grid[x - 1][y];
                 if (x > 0 && y > 0 && grid[x - 1][y - 1]) total++; // top left
                 if (x > 0 && y < row_count - 1 && grid[x - 1][y + 1]) total++; // bottom left
                 if (x > 0 && grid[x - 1][y]) total++; // left
@@ -68,7 +79,7 @@ void day18_part1() {
             for (int y = 0; y < row_count; y++)
                 grid[x][y] = temp_grid[x][y];
 
-        print_grid(row_count, row_width, grid);
+        print_grid(10, 10, grid);
     }
 
     int total = 0;
@@ -76,7 +87,6 @@ void day18_part1() {
         for (int y = 0; y < row_count; y++)
             if (grid[x][y]) total++;
 
-    // x < 848
     print_ln("total lights on is %i", total);
 }
 
