@@ -74,6 +74,19 @@ static int GetRowCount(const char *input, const size_t len, int *max_row_size) {
     return row_count;
 }
 
+
+/// @param input
+/// @param len
+/// @param row_count
+/// @param max_row_size
+/// @param rows
+/// @remark
+/// Example:\n
+/// int max_row_size = 0;\n
+/// int row_count = GetRowCount(input, len, &max_row_size);\n
+/// char rows[row_count][max_row_size];\n
+/// SplitIntoRows(input, len, &row_count, &max_row_size, rows);\n
+///
 static void SplitIntoRows(const char *input, const size_t len, const int *row_count, const int *max_row_size,
                           char rows[][*max_row_size]) {
     int row_lengths[*row_count];
