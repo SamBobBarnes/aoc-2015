@@ -74,6 +74,7 @@ static int GetRowCount(const char *input, const size_t len, int *max_row_size) {
     }
     if (input[len - 1] != '\n') row_count++;
 
+    (*max_row_size)++;
     return row_count;
 }
 
@@ -88,27 +89,30 @@ static int GetRowCount(const char *input, const size_t len, int *max_row_size) {
 /// int max_row_size = 0;\n
 /// int row_count = GetRowCount(input, len, &max_row_size);\n
 /// char rows[row_count][max_row_size];\n
-/// SplitIntoRows(input, len, &row_count, &max_row_size, rows);\n
+/// SplitIntoRows(input, len, row_count, max_row_size, rows)\n
 ///
-static void SplitIntoRows(const char *input, const size_t len, const int *row_count, const int *max_row_size,
-                          char rows[*row_count][*max_row_size]) {
+static void SplitIntoRows(const char *input, const size_t len, const int row_count, const int max_row_size,
+                          char rows[row_count][max_row_size]) {
     int current_row = 0;
     int row_index = 0;
 
-    for (int i = 0; i < *row_count; i++) {
-        strcpy(rows[current_row], "");
+    for (int i = 0; i < row_count; i++) {
+        rows[i][0] = '\0';
     }
 
     for (int i = 0; i < len; i++) {
         if (input[i] == '\n') {
+            rows[current_row][row_index] = '\0';
             row_index = 0;
             current_row++;
             continue;
         }
-        char temp2[2] = "0\0";
-        temp2[0] = input[i];
-        strcat(rows[current_row], temp2);
-        row_index++;
+        if (row_index < max_row_size - 1) {
+            rows[current_row][row_index++] = input[i];
+        }
+    }
+    if (current_row < row_count) {
+        rows[current_row][row_index] = '\0';
     }
 }
 

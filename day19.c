@@ -12,7 +12,7 @@
 int index_of(const char *string, const char *search_string, const int offset) {
     const size_t len = strlen(string);
     const size_t search_len = strlen(search_string);
-    for (int i = offset; i < len - 1 - search_len; i++) {
+    for (int i = offset; i < len - search_len + 1; i++) {
         bool match = true;
         for (int j = 0; j < search_len; j++)
             if (string[i + j] != search_string[j]) {
@@ -29,27 +29,31 @@ int index_of(const char *string, const char *search_string, const int offset) {
 
 void day19_part1() {
     print_header(19, 1);
-    const char *input = day19_input.test_input;
+    const char *input = day19_input.input;
     const size_t len = strlen(input);
 
     int max_row_size = 0;
     int row_count = GetRowCount(input, len, &max_row_size);
     char rows[row_count][max_row_size];
-    SplitIntoRows(input, len, &row_count, &max_row_size, rows);
+    SplitIntoRows(input, len, row_count, max_row_size, rows);
 
     char *sut = rows[row_count - 1];
     size_t sut_len = strlen(sut);
-    char possibles[row_count * 10][max_row_size * 2];
+
+    char **possibles = malloc(sizeof(char *) * row_count * 100);
+    for (int i = 0; i < row_count * 10; i++) {
+        possibles[i] = (char *) malloc(sizeof(char) * max_row_size);
+        possibles[i][0] = '\0';
+    }
     int possible_count = 0;
 
-    for (int i = 0; i < row_count * 10; i++) possibles[i][0] = '\0';
-
-    for (int i = 0; i < row_count - 3; i++) {
+    for (int i = 0; i < row_count - 2; i++) {
         char temp[max_row_size * 2];
+        temp[0] = '\0';
         int index;
 
         int space_index = index_of(rows[i], " ", 0);
-        char search_string[4];
+        char search_string[3] = "\0\0\0";
         strncpy(search_string, rows[i], space_index);
         size_t search_len = strlen(search_string);
         char *replacement_string = &rows[i][space_index + 4];
@@ -63,9 +67,10 @@ void day19_part1() {
 
             if (index == -1) break; // no more left
 
+            temp[0] = '\0';
             strncpy(temp, sut, index);
             strcpy(&temp[index], replacement_string);
-            strncpy(&temp[index + replacement_len], &sut[index + search_len], sut_len - index - search_len);
+            strcpy(&temp[index + replacement_len], &sut[index + search_len]);
 
             if (debugging) {
                 printf("%i,", index);
@@ -87,7 +92,9 @@ void day19_part1() {
         } while (index >= 0);
     }
 
+    // 443 < x
     print_ln("There are %i unique replacements.", possible_count);
+    free(possibles);
 }
 
 void day19_part2() {

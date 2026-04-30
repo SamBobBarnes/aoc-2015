@@ -28,7 +28,7 @@ void day18_part1() {
     int row_width = 0;
     int row_count = GetRowCount(input, len, &row_width);
     char rows[row_count][row_width];
-    SplitIntoRows(input, len, &row_count, &row_width, rows);
+    SplitIntoRows(input, len, row_count, row_width, rows);
 
     bool grid[row_width][row_count];
     row_width--;
@@ -90,7 +90,7 @@ void day18_part2() {
     int row_width = 0;
     int row_count = GetRowCount(input, len, &row_width);
     char rows[row_count][row_width];
-    SplitIntoRows(input, len, &row_count, &row_width, rows);
+    SplitIntoRows(input, len, row_count, row_width, rows);
 
     bool grid[row_width][row_count];
     row_width--;

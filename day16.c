@@ -31,7 +31,7 @@ void day16_part1() {
     int max_row_size = 0;
     int row_count = GetRowCount(input, len, &max_row_size);
     char rows[row_count][max_row_size];
-    SplitIntoRows(input, len, &row_count, &max_row_size, rows);
+    SplitIntoRows(input, len, row_count, max_row_size, rows);
 
     MfcsamScan my_scan = (MfcsamScan){
         3, 7, 2, 3, 0, 0, 5, 3, 2, 1
@@ -146,7 +146,7 @@ void day16_part2() {
     int max_row_size = 0;
     int row_count = GetRowCount(input, len, &max_row_size);
     char rows[row_count][max_row_size];
-    SplitIntoRows(input, len, &row_count, &max_row_size, rows);
+    SplitIntoRows(input, len, row_count, max_row_size, rows);
 
     MfcsamScan my_scan = (MfcsamScan){
         3, 7, 2, 3, 0, 0, 5, 3, 2, 1
