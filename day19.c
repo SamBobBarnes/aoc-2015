@@ -40,9 +40,10 @@ void day19_part1() {
     char *sut = rows[row_count - 1];
     size_t sut_len = strlen(sut);
 
-    char **possibles = malloc(sizeof(char *) * row_count * 100);
-    for (int i = 0; i < row_count * 10; i++) {
-        possibles[i] = (char *) malloc(sizeof(char) * max_row_size);
+    int possibles_max_size = row_count * 100;
+    char **possibles = malloc(sizeof(char *) * possibles_max_size);
+    for (int i = 0; i < possibles_max_size; i++) {
+        possibles[i] = (char *) malloc(sizeof(char) * max_row_size * 2);
         possibles[i][0] = '\0';
     }
     int possible_count = 0;
