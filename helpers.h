@@ -62,13 +62,14 @@ static void free_ptr(void *ptr) {
 static int GetRowCount(const char *input, const size_t len, int *max_row_size) {
     int index_of_last_newline = -1;
     int row_count = 0;
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < len; i++) {
         if (input[i] == '\n') {
             row_count++;
-            int row_len = i - index_of_last_newline;
-            if (row_len > *max_row_size) *max_row_size = row_len;
             index_of_last_newline = i;
         }
+        int row_len = i - index_of_last_newline;
+        if (row_len > *max_row_size) *max_row_size = row_len;
+    }
     if (input[len - 1] != '\n') row_count++;
 
     return row_count;
@@ -89,14 +90,12 @@ static int GetRowCount(const char *input, const size_t len, int *max_row_size) {
 ///
 static void SplitIntoRows(const char *input, const size_t len, const int *row_count, const int *max_row_size,
                           char rows[][*max_row_size]) {
-    int row_lengths[*row_count];
     int current_row = 0;
     int row_index = 0;
 
     for (int i = 0; i < len; i++) {
         if (input[i] == '\n') {
             rows[current_row][row_index] = '\0';
-            row_lengths[current_row] = row_index;
             row_index = 0;
             current_row++;
             continue;
@@ -106,7 +105,6 @@ static void SplitIntoRows(const char *input, const size_t len, const int *row_co
     }
     if (input[len - 1] != '\n') {
         rows[current_row][row_index] = '\0';
-        row_lengths[current_row] = row_index;
     }
 }
 
