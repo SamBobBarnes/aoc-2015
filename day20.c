@@ -5,6 +5,7 @@
 #include "day20.h"
 #include "Inputs/day20.h"
 
+#include <math.h>
 #include <string.h>
 
 void day20_part1() {
@@ -12,15 +13,17 @@ void day20_part1() {
     const char *input = day20_input.input;
     const size_t len = strlen(input);
 
-    int total = atoi(input);
+    int total = atoi(input) / 10;
 
-    int *counts[total];
+    // int *counts[total];
 
     for (int i = 1; i <= total; i++) {
         int count = 0;
-        for (int j = 1; j <= i; j++) {
+        int rt = (int) sqrt(i);
+        for (int j = 1; j <= rt; j++) {
             if (i % j == 0) {
-                count += j * 10;
+                count += j;
+                count += i / j;
             }
             if (count >= total) {
                 printf("%i", i);
