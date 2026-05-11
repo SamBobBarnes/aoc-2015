@@ -89,7 +89,7 @@ void day19_part1() {
                 strcpy(possibles[possible_count++], temp);
             }
 
-            offset = index + search_len;
+            offset = (int) (index + search_len);
         } while (index >= 0);
     }
 
@@ -103,9 +103,35 @@ typedef struct {
     char value[10];
 } Replacement;
 
+enum TokenType {
+    TOKEN, // X
+    RN, // (
+    AR, // )
+    Y, // ,
+    TILT
+};
+
+typedef struct {
+    enum TokenType type;
+    char key[3];
+} Molecule;
+
+void print_molecule(const Molecule *molecule, const size_t len) {
+    for (int i = 0; i < len; i++) {
+        if (molecule[i].type == TOKEN)
+            printf("%s", molecule[i].key);
+        else if (molecule[i].type == RN)
+            printf("(");
+        else if (molecule[i].type == AR)
+            printf(")");
+        else if (molecule[i].type == Y)
+            printf(",");
+    }
+}
+
 void day19_part2() {
     print_header(19, 2);
-    const char *input = day19_input.test_input;
+    const char *input = day19_input.input;
     const size_t len = strlen(input);
 
     int max_row_size = 0;
@@ -122,6 +148,38 @@ void day19_part2() {
         strncpy(replacements[i].key, rows[i], space_index);
         strcpy(replacements[i].value, &rows[i][space_index + 4]);
     }
+
+    const char *molecule = rows[row_count - 1];
+    const size_t mol_len = strlen(molecule);
+
+    Molecule molecules[mol_len];
+    int mol_count = 0;
+
+    for (int i = 0; i < mol_len; i++) {
+        molecules[i] = (Molecule){TILT, "\0\0\0"};
+        if (i < mol_len - 1 && molecule[i + 1] >= 97) {
+            char key[3] = "\0\0\0";
+            sprintf(key, "%c%c", (char) molecule[i], (char) molecule[i + 1]);
+            if (strcmp(key, "Rn") == 0)
+                molecules[i].type = RN;
+            else if (strcmp(key, "Ar") == 0)
+                molecules[i].type = AR;
+            else
+                molecules[i].type = TOKEN;
+            strcpy(molecules[i].key, key);
+            i++;
+        } else {
+            if (molecule[i] == 'Y')
+                molecules[i].type = Y;
+            else
+                molecules[i].type = TOKEN;
+            molecules[i].key[0] = molecule[i];
+        }
+
+        mol_count++;
+    }
+
+    print_molecule(molecules, mol_count);
 }
 
 
