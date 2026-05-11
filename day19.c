@@ -98,23 +98,27 @@ void day19_part1() {
     free(possibles);
 }
 
-typedef struct {
-    char key[3];
-    char value[10];
-} Replacement;
-
 enum TokenType {
+    TILT,
     TOKEN, // X
     RN, // (
     AR, // )
-    Y, // ,
-    TILT
+    Y // ,
 };
 
 typedef struct {
     enum TokenType type;
     char key[3];
 } Molecule;
+
+
+typedef struct {
+    char key[3];
+    char value[10];
+    Molecule molecule[8];
+    int mol_count;
+} Replacement;
+
 
 void print_molecule(const Molecule *molecule, const size_t len) {
     for (int i = 0; i < len; i++) {
@@ -127,6 +131,42 @@ void print_molecule(const Molecule *molecule, const size_t len) {
         else if (molecule[i].type == Y)
             printf(",");
     }
+}
+
+void create_molecules(const char *molecule, const size_t mol_len, Molecule molecules[], int *mol_count) {
+    for (int i = 0; i < mol_len; i++) {
+        molecules[*mol_count] = (Molecule){TILT, "\0\0\0"};
+        if (i < mol_len - 1 && molecule[i + 1] >= 97) {
+            char key[3] = "\0\0\0";
+            sprintf(key, "%c%c", (char) molecule[i], (char) molecule[i + 1]);
+            if (strcmp(key, "Rn") == 0)
+                molecules[*mol_count].type = RN;
+            else if (strcmp(key, "Ar") == 0)
+                molecules[*mol_count].type = AR;
+            else
+                molecules[*mol_count].type = TOKEN;
+            strcpy(molecules[*mol_count].key, key);
+            i++;
+        } else {
+            if (molecule[i] == 'Y')
+                molecules[*mol_count].type = Y;
+            else
+                molecules[*mol_count].type = TOKEN;
+            molecules[*mol_count].key[0] = molecule[i];
+        }
+
+        (*mol_count)++;
+    }
+}
+
+bool cmp_mol(const Molecule *a, const int mol_a_len, const Molecule *b, const int mol_b_len) {
+    if (mol_a_len != mol_b_len) return false;
+    for (int i = 0; i < mol_a_len; i++)
+        if (strcmp(a[i].key, b[i].key) != 0) return false;
+    return true;
+}
+
+int recurse_mol(const Molecule *molec, const size_t mol_len) {
 }
 
 void day19_part2() {
@@ -147,6 +187,9 @@ void day19_part2() {
         replacements[i].key[2] = '\0';
         strncpy(replacements[i].key, rows[i], space_index);
         strcpy(replacements[i].value, &rows[i][space_index + 4]);
+        replacements[i].mol_count = 0;
+        create_molecules(replacements[i].value, strlen(replacements[i].value), replacements[i].molecule,
+                         &replacements[i].mol_count);
     }
 
     const char *molecule = rows[row_count - 1];
@@ -155,29 +198,7 @@ void day19_part2() {
     Molecule molecules[mol_len];
     int mol_count = 0;
 
-    for (int i = 0; i < mol_len; i++) {
-        molecules[i] = (Molecule){TILT, "\0\0\0"};
-        if (i < mol_len - 1 && molecule[i + 1] >= 97) {
-            char key[3] = "\0\0\0";
-            sprintf(key, "%c%c", (char) molecule[i], (char) molecule[i + 1]);
-            if (strcmp(key, "Rn") == 0)
-                molecules[i].type = RN;
-            else if (strcmp(key, "Ar") == 0)
-                molecules[i].type = AR;
-            else
-                molecules[i].type = TOKEN;
-            strcpy(molecules[i].key, key);
-            i++;
-        } else {
-            if (molecule[i] == 'Y')
-                molecules[i].type = Y;
-            else
-                molecules[i].type = TOKEN;
-            molecules[i].key[0] = molecule[i];
-        }
-
-        mol_count++;
-    }
+    create_molecules(molecule, mol_len, molecules, &mol_count);
 
     print_molecule(molecules, mol_count);
 }
