@@ -98,10 +98,30 @@ void day19_part1() {
     free(possibles);
 }
 
+typedef struct {
+    char key[3];
+    char value[10];
+} Replacement;
+
 void day19_part2() {
     print_header(19, 2);
     const char *input = day19_input.test_input;
     const size_t len = strlen(input);
+
+    int max_row_size = 0;
+    int row_count = GetRowCount(input, len, &max_row_size);
+    char rows[row_count][max_row_size];
+    SplitIntoRows(input, len, row_count, max_row_size, rows);
+
+    Replacement replacements[row_count - 2];
+
+    for (int i = 0; i < row_count - 2; i++) {
+        int space_index = index_of(rows[i], " ", 0);
+        replacements[i].key[1] = '\0';
+        replacements[i].key[2] = '\0';
+        strncpy(replacements[i].key, rows[i], space_index);
+        strcpy(replacements[i].value, &rows[i][space_index + 4]);
+    }
 }
 
 
