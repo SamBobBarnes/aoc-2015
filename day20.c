@@ -15,8 +15,6 @@ void day20_part1() {
 
     int total = atoi(input) / 10;
 
-    // int *counts[total];
-
     for (int i = 1; i <= total; i++) {
         int count = 0;
         int rt = (int) sqrt(i);
