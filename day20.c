@@ -33,8 +33,31 @@ void day20_part1() {
 
 void day20_part2() {
     print_header(20, 2);
-    const char *input = day20_input.test_input;
+    const char *input = day20_input.input;
     const size_t len = strlen(input);
+
+    int total = atoi(input);
+    int i = 0;
+    do {
+        int count = 0;
+        int rt = (int) sqrt(i);
+        for (int j = 1; j <= rt; j++) {
+            if (i % j == 0) {
+                if (j <= 50) {
+                    count += i / j;
+                }
+                if (i / j <= 50) {
+                    count += j;
+                }
+            }
+            if (count * 11 >= total) {
+                printf("%i", i);
+                return;
+            }
+        }
+        i++;
+    } while (true);
+    // x < 887040
 }
 
 IDay day20 = {
