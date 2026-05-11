@@ -119,11 +119,16 @@ typedef struct {
     int mol_count;
 } Replacement;
 
+typedef struct {
+    enum TokenType type;
+    int count;
+} TokenCount;
 
-void print_molecule(const Molecule *molecule, const size_t len) {
+
+void print_molecule(const TokenCount *molecule, const size_t len) {
     for (int i = 0; i < len; i++) {
         if (molecule[i].type == TOKEN)
-            printf("%s", molecule[i].key);
+            printf("%iT", molecule[i].count);
         else if (molecule[i].type == RN)
             printf("(");
         else if (molecule[i].type == AR)
@@ -159,16 +164,6 @@ void create_molecules(const char *molecule, const size_t mol_len, Molecule molec
     }
 }
 
-bool cmp_mol(const Molecule *a, const int mol_a_len, const Molecule *b, const int mol_b_len) {
-    if (mol_a_len != mol_b_len) return false;
-    for (int i = 0; i < mol_a_len; i++)
-        if (strcmp(a[i].key, b[i].key) != 0) return false;
-    return true;
-}
-
-int recurse_mol(const Molecule *molec, const size_t mol_len) {
-}
-
 void day19_part2() {
     print_header(19, 2);
     const char *input = day19_input.input;
@@ -179,19 +174,6 @@ void day19_part2() {
     char rows[row_count][max_row_size];
     SplitIntoRows(input, len, row_count, max_row_size, rows);
 
-    Replacement replacements[row_count - 2];
-
-    for (int i = 0; i < row_count - 2; i++) {
-        int space_index = index_of(rows[i], " ", 0);
-        replacements[i].key[1] = '\0';
-        replacements[i].key[2] = '\0';
-        strncpy(replacements[i].key, rows[i], space_index);
-        strcpy(replacements[i].value, &rows[i][space_index + 4]);
-        replacements[i].mol_count = 0;
-        create_molecules(replacements[i].value, strlen(replacements[i].value), replacements[i].molecule,
-                         &replacements[i].mol_count);
-    }
-
     const char *molecule = rows[row_count - 1];
     const size_t mol_len = strlen(molecule);
 
@@ -200,7 +182,17 @@ void day19_part2() {
 
     create_molecules(molecule, mol_len, molecules, &mol_count);
 
-    print_molecule(molecules, mol_count);
+    int bracket_count = 0;
+    int comma_count = 0;
+    for (int i = 0; i < mol_count; i++) {
+        if (molecules[i].type == RN || molecules[i].type == AR)
+            bracket_count++;
+        if (molecules[i].type == Y)
+            comma_count++;
+    }
+
+    // x < 213
+    printf("It will take %i steps", mol_count - bracket_count - comma_count * 2 - 1);
 }
 
 
