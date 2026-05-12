@@ -5,34 +5,130 @@
 #include "day22.h"
 #include "Inputs/day22.h"
 
+#include <stdint.h>
 #include <string.h>
 
 #include "priority-q.h"
 
 typedef struct {
-    int cost;
+    uint8_t id;
+    uint8_t cost;
     bool instant;
-    int damage;
-    int armor;
-    int recharge;
-    int heal;
-    int duration;
+    uint8_t damage;
+    uint8_t armor;
+    uint8_t recharge;
+    uint8_t heal;
+    uint8_t duration;
 } Spell;
+
+typedef struct {
+    uint8_t id;
+    uint8_t time_remaining;
+    uint8_t dmg;
+    uint8_t armor;
+    uint8_t recharge;
+} Effect;
+
+enum FightResult {
+    PlayerWin,
+    BossWin,
+    NoWin
+};
+
+typedef struct {
+    uint8_t player_hp;
+    int player_mana;
+    int mana_used;
+    uint8_t boss_hp;
+    uint8_t boss_dmg;
+    enum FightResult result;
+    uint8_t effect_count;
+    Effect *effects;
+} FightState;
+
+FightState *enqueue_state(PriorityQueue *pq, const FightState *state, const Spell *spell) {
+    auto fight_state = (FightState *) malloc(sizeof(FightState));
+    fight_state->player_hp = state->player_hp;
+    fight_state->player_mana = state->player_mana;
+    fight_state->mana_used = state->mana_used;
+    fight_state->boss_hp = state->boss_hp;
+    fight_state->boss_dmg = state->boss_dmg;
+
+    fight_state->effects = malloc((state->effect_count + 1) * sizeof(Effect));
+    //player turn
+    for (int i = 0; i < state->effect_count; i++) {
+        if (state->effects[i].time_remaining == 0) {
+            // spell has no effect if it has no more duration
+            continue;
+        }
+        fight_state->boss_hp -= state->effects[i].dmg;
+        fight_state->player_mana += state->effects[i].recharge;
+
+        fight_state->effects[fight_state->effect_count] = state->effects[i];
+        fight_state->effects[fight_state->effect_count++].time_remaining--;
+    }
+
+    if (!spell->instant) {
+        fight_state->effects[fight_state->effect_count++] = (Effect){
+            spell->id, spell->duration, spell->damage, spell->armor, spell->recharge
+        };
+    } else {
+        fight_state->player_hp += spell->heal;
+        fight_state->boss_hp -= spell->damage;
+    }
+    fight_state->mana_used += spell->cost;
+
+    int armor = 0;
+    // boss turn
+
+    // apply other effects
+    for (int i = 0; i < fight_state->effect_count; i++) {
+        fight_state->boss_hp -= fight_state->effects[i].dmg;
+        fight_state->player_mana += fight_state->effects[i].recharge;
+        armor += fight_state->effects[i].armor;
+    }
+
+    if (fight_state->boss_hp <= 0) {
+        fight_state->result = PlayerWin;
+        return fight_state; // player wins
+    }
+    fight_state->player_hp -= fight_state->boss_dmg - armor;
+    if (fight_state->player_hp <= 0) {
+        fight_state->result = BossWin;
+        return fight_state; // player loses
+    }
+
+    enqueue(pq, new_pq_item(fight_state->mana_used, fight_state));
+
+    fight_state->result = NoWin;
+    return fight_state; // noone has died
+}
 
 void day22_part1() {
     print_header(22, 1);
-    const char *input = day22_input.test_input;
-    const size_t len = strlen(input);
+
+    uint8_t boss_hp = 13; //todo: update for actual input
+    uint8_t boss_dmg = 8;
+
+    uint8_t player_hp = 10; // todo: update for actual input
+    int player_mana = 250;
 
     Spell spells[5] = {
-        {53, true, 4}, // magic missile
-        {73, true, 2, 0, 0, 2}, // drain
-        {113, false, 0, 7, 0, 0, 6}, // shield
-        {173, false, 3, 0, 0, 0, 6}, // poison
-        {229, false, 0, 0, 101, 0, 5} // recharge
+        {0, 53, true, 4}, // magic missile
+        {1, 73, true, 2, 0, 0, 2}, // drain
+        {2, 113, false, 0, 7, 0, 0, 6}, // shield
+        {3, 173, false, 3, 0, 0, 0, 6}, // poison
+        {4, 229, false, 0, 0, 101, 0, 5} // recharge
     };
 
-    PriorityQueue *q;
+    FightState initial_state = (FightState){player_hp, player_mana, 0, boss_hp, boss_dmg, 0};
+
+    PriorityQueue *q = create_priority_queue(true);
+
+    enqueue(q, new_pq_item(0, &initial_state));
+
+    while (!is_empty(q)) {
+    }
 }
 
 void day22_part2() {

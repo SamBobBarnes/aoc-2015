@@ -18,7 +18,7 @@ typedef struct PriorityQueue PriorityQueue;
 /// @param value
 /// @remark
 /// Enqueue item with a priority
-void enqueue(PriorityQueue *pq, PriorityItem value);
+void enqueue(PriorityQueue *pq, const PriorityItem *value);
 
 /// @param pq
 /// @remark
@@ -29,6 +29,16 @@ PriorityItem dequeue(PriorityQueue *pq);
 /// @remark
 /// Peek item with most important priority without removing from queue
 PriorityItem peek(const PriorityQueue *pq);
+
+/// @param pq
+/// @remark
+/// Checks if priority queue is empty
+bool is_empty(const PriorityQueue *pq);
+
+/// @param item
+/// @remark
+/// Free the memory of the item and its pointer
+void free_item(PriorityItem *item);
 
 /// @param pq
 /// @remark

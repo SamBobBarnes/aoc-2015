@@ -15,6 +15,7 @@ struct PriorityItem {
     int priority;
 };
 
+
 struct PriorityQueue {
     /// Items contained in the queue
     PriorityItem items[MAX];
@@ -28,6 +29,13 @@ PriorityQueue *create_priority_queue(const bool inverse) {
     const auto pq = (PriorityQueue *) malloc(sizeof(PriorityQueue));
     pq->inverse = inverse;
     return pq;
+}
+
+PriorityItem *new_pq_item(const int priority, void *value) {
+    const auto item = (PriorityItem *) malloc(sizeof(PriorityItem));
+    item->value = value;
+    item->priority = priority;
+    return item;
 }
 
 
@@ -47,13 +55,17 @@ void heapifyUp(PriorityQueue *pq, const int index) {
     }
 }
 
-void enqueue(PriorityQueue *pq, const PriorityItem value) {
+bool is_empty(const PriorityQueue *pq) {
+    return pq->size > 0;
+}
+
+void enqueue(PriorityQueue *pq, const PriorityItem *value) {
     if (pq->size == MAX) {
         printf("Priority queue is full\n");
         return;
     }
 
-    pq->items[pq->size++] = value;
+    pq->items[pq->size++] = *value;
     heapifyUp(pq, pq->size - 1);
 }
 
@@ -98,12 +110,18 @@ PriorityItem peek(const PriorityQueue *pq) {
     return pq->items[0];
 }
 
+void free_item(PriorityItem *item) {
+    free(item->value);
+    free(item);
+}
+
 void free_content(PriorityQueue *pq) {
     if (pq->size > 0) {
         for (int i = 0; i < MAX; i++) {
-            free(pq->items[i].value);
+            free_item(&pq->items[i]);
         }
     }
     free(pq->items);
     free(pq);
 }
+
