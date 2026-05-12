@@ -128,7 +128,17 @@ void day22_part1() {
     enqueue(q, new_pq_item(0, &initial_state));
 
     while (!is_empty(q)) {
+        // dequeue
+        // check if state results in loss or win
+        // if win
+        //   end
+        // else
+        //   enqueue each spell that is not already queued
+        // free effects
+        // free state
     }
+
+    free_content(q);
 }
 
 void day22_part2() {
