@@ -47,12 +47,14 @@ typedef struct {
 } FightState;
 
 FightState *enqueue_state(PriorityQueue *pq, const FightState *state, const Spell *spell) {
-    auto fight_state = (FightState *) malloc(sizeof(FightState));
+    FightState *fight_state = malloc(sizeof(FightState));
     fight_state->player_hp = state->player_hp;
     fight_state->player_mana = state->player_mana;
     fight_state->mana_used = state->mana_used;
     fight_state->boss_hp = state->boss_hp;
     fight_state->boss_dmg = state->boss_dmg;
+    fight_state->effect_count = 0;
+    fight_state->result = NoWin;
 
     fight_state->effects = malloc((state->effect_count + 1) * sizeof(Effect));
     //player turn
@@ -100,7 +102,6 @@ FightState *enqueue_state(PriorityQueue *pq, const FightState *state, const Spel
 
     enqueue(pq, new_pq_item(fight_state->mana_used, fight_state));
 
-    fight_state->result = NoWin;
     return fight_state; // noone has died
 }
 
@@ -121,31 +122,32 @@ void day22_part1() {
         {4, 229, false, 0, 0, 101, 0, 5} // recharge
     };
 
-    FightState initial_state = (FightState){player_hp, player_mana, 0, boss_hp, boss_dmg, 0};
+    FightState initial_state = (FightState){player_hp, player_mana, 0, boss_hp, boss_dmg, NoWin, 0};
 
-    PriorityQueue *q = create_priority_queue(true);
+    PriorityQueue q = create_priority_queue(100000, false);
 
-    enqueue(q, new_pq_item(0, &initial_state));
+    enqueue(&q, new_pq_item(0, &initial_state));
 
-    while (!is_empty(q)) {
-        FightState *state = dequeue(q);
+    while (!is_empty(&q)) {
+        FightState *state = dequeue(&q);
         if (state->result == BossWin) continue;
         if (state->result == PlayerWin) {
             printf("%i mana used to defeat the boss with %i hp left", state->mana_used, state->player_hp);
             break;
         }
 
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 5; i++) {
+            bool can_add = true;
             for (int j = 0; j < state->effect_count; j++) {
-                if (state->effects[j].id == spells[i].id && state->effects[j].time_remaining > 0) continue;
-                enqueue_state(q, state, &spells[i]);
+                if (state->effects[j].id == spells[i].id && state->effects[j].time_remaining > 0) can_add = false;
             }
+            if (can_add)
+                enqueue_state(&q, state, &spells[i]);
+        }
 
         free(state->effects);
-        free(state);
     }
-
-    free_content(q);
+    free_content(&q);
 }
 
 void day22_part2() {

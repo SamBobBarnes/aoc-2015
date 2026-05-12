@@ -8,33 +8,19 @@
 #include <stdlib.h>
 
 
-struct PriorityItem {
-    /// Pointer to the prioritized item
-    void *value;
-    /// The priority used to sort the item in the queue
-    int priority;
-};
-
-
-struct PriorityQueue {
-    /// Items contained in the queue
-    PriorityItem items[MAX];
-    /// Current size of the queue
-    int size;
-    /// If true, the smallest value is prioritized, if false, the largest value is prioritized
-    bool inverse;
-};
-
-PriorityQueue *create_priority_queue(const bool inverse) {
-    const auto pq = (PriorityQueue *) malloc(sizeof(PriorityQueue));
-    pq->inverse = inverse;
+PriorityQueue create_priority_queue(const int size, const bool inverse) {
+    PriorityQueue pq;
+    pq.items = malloc(sizeof(PriorityItem) * size);
+    pq.size = 0;
+    pq.max_size = size;
+    pq.inverse = inverse;
     return pq;
 }
 
-PriorityItem *new_pq_item(const int priority, void *value) {
-    const auto item = (PriorityItem *) malloc(sizeof(PriorityItem));
-    item->value = value;
-    item->priority = priority;
+PriorityItem new_pq_item(const int priority, void *value) {
+    PriorityItem item;
+    item.value = value;
+    item.priority = priority;
     return item;
 }
 
@@ -56,16 +42,16 @@ void heapifyUp(PriorityQueue *pq, const int index) {
 }
 
 bool is_empty(const PriorityQueue *pq) {
-    return pq->size > 0;
+    return pq->size == 0;
 }
 
-void enqueue(PriorityQueue *pq, const PriorityItem *value) {
-    if (pq->size == MAX) {
+void enqueue(PriorityQueue *pq, const PriorityItem value) {
+    if (pq->size == pq->max_size) {
         printf("Priority queue is full\n");
         return;
     }
 
-    pq->items[pq->size++] = *value;
+    pq->items[pq->size++] = value;
     heapifyUp(pq, pq->size - 1);
 }
 
@@ -93,7 +79,7 @@ void heapifyDown(PriorityQueue *pq, const int index) {
 void *dequeue(PriorityQueue *pq) {
     if (!pq->size) {
         printf("Priority queue is empty\n");
-        return nullptr;
+        return NULL;
     }
 
     PriorityItem item = pq->items[0];
@@ -105,23 +91,21 @@ void *dequeue(PriorityQueue *pq) {
 void *peek(const PriorityQueue *pq) {
     if (!pq->size) {
         printf("Priority queue is empty\n");
-        return nullptr;
+        return NULL;
     }
     return pq->items[0].value;
 }
 
 void free_item(PriorityItem *item) {
     free(item->value);
-    free(item);
 }
 
 void free_content(PriorityQueue *pq) {
     if (pq->size > 0) {
-        for (int i = 0; i < MAX; i++) {
+        for (int i = 0; i < pq->size; i++) {
             free_item(&pq->items[i]);
         }
     }
     free(pq->items);
-    free(pq);
 }
 

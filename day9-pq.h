@@ -26,10 +26,10 @@ typedef struct {
     bool inverse;
 } D9PriorityQueue;
 
-void enqueue(D9PriorityQueue *pq, D9ItemPriority value);
+void d9enqueue(D9PriorityQueue *pq, D9ItemPriority value);
 
-D9ItemPriority dequeue(D9PriorityQueue *pq);
+D9ItemPriority d9dequeue(D9PriorityQueue *pq);
 
-D9ItemPriority peek(const D9PriorityQueue *pq);
+D9ItemPriority d9peek(const D9PriorityQueue *pq);
 
 #endif //AOC_2015_DAY9_PQ_H

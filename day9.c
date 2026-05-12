@@ -140,8 +140,8 @@ void day9_part1() {
             routes[route_index].distance = INT_MAX;
 
             D9PriorityQueue q = {{(D9ItemPriority){0, i, (D9History){{0}, 0}}}, 1, false};
-            while (peek(&q).id != -1) {
-                const D9ItemPriority ip = dequeue(&q);
+            while (d9peek(&q).id != -1) {
+                const D9ItemPriority ip = d9dequeue(&q);
                 const Node *city = &cities[ip.id];
 
                 if (debugging) {
@@ -182,7 +182,7 @@ void day9_part1() {
 
                     debug_ln("enqueuing %s", cities[link->dest].name);
 
-                    enqueue(&q, (D9ItemPriority){ip.priority + link->distance, link->dest, node_history});
+                    d9enqueue(&q, (D9ItemPriority){ip.priority + link->distance, link->dest, node_history});
                 }
             }
 
