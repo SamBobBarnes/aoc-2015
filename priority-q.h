@@ -8,12 +8,7 @@
 #define MAX 10000
 
 /// @brief Represents an item with a priority
-typedef struct {
-    /// Pointer to the prioritized item
-    void *value;
-    /// The priority used to sort the item in the queue
-    int priority;
-} PriorityItem;
+typedef struct PriorityItem PriorityItem;
 
 
 /// @brief Represents a priority sorted queue
@@ -39,5 +34,19 @@ PriorityItem peek(const PriorityQueue *pq);
 /// @remark
 /// Free the memory of all contained pointers
 void free_content(PriorityQueue *pq);
+
+/// @param inverse
+///  If true, the smallest value is prioritized, else the largest value is prioritized
+/// @remark
+/// Create the priority queue
+PriorityQueue *create_priority_queue(bool inverse);
+
+/// @param priority
+/// The priority used to sort the item in the queue
+/// @param value
+/// The pointer to the object being prioritized
+/// @remark
+/// Create a new PriorityItem
+PriorityItem *new_pq_item(int priority, void *value);
 
 #endif //PRIORITY_Q_H

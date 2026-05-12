@@ -5,6 +5,15 @@
 #include "priority-q.h"
 
 #include <stdio.h>
+#include <stdlib.h>
+
+
+struct PriorityItem {
+    /// Pointer to the prioritized item
+    void *value;
+    /// The priority used to sort the item in the queue
+    int priority;
+};
 
 struct PriorityQueue {
     /// Items contained in the queue
@@ -14,6 +23,13 @@ struct PriorityQueue {
     /// If true, the smallest value is prioritized, if false, the largest value is prioritized
     bool inverse;
 };
+
+PriorityQueue *create_priority_queue(const bool inverse) {
+    const auto pq = (PriorityQueue *) malloc(sizeof(PriorityQueue));
+    pq->inverse = inverse;
+    return pq;
+}
+
 
 void swap(PriorityItem *a, PriorityItem *b) {
     const PriorityItem temp = *a;
@@ -80,4 +96,14 @@ PriorityItem peek(const PriorityQueue *pq) {
         return (PriorityItem){nullptr, -1};
     }
     return pq->items[0];
+}
+
+void free_content(PriorityQueue *pq) {
+    if (pq->size > 0) {
+        for (int i = 0; i < MAX; i++) {
+            free(pq->items[i].value);
+        }
+    }
+    free(pq->items);
+    free(pq);
 }
