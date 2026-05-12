@@ -6,8 +6,17 @@
 
 #include <stdio.h>
 
+struct PriorityQueue {
+    /// Items contained in the queue
+    PriorityItem items[MAX];
+    /// Current size of the queue
+    int size;
+    /// If true, the smallest value is prioritized, if false, the largest value is prioritized
+    bool inverse;
+};
+
 void swap(PriorityItem *a, PriorityItem *b) {
-    PriorityItem temp = *a;
+    const PriorityItem temp = *a;
     *a = *b;
     *b = temp;
 }
@@ -34,8 +43,8 @@ void enqueue(PriorityQueue *pq, const PriorityItem value) {
 
 void heapifyDown(PriorityQueue *pq, const int index) {
     int smallest = index;
-    int left = 2 * index + 1;
-    int right = 2 * index + 2;
+    const int left = 2 * index + 1;
+    const int right = 2 * index + 2;
 
     if (left < pq->size
         && ((!pq->inverse && pq->items[left].priority < pq->items[smallest].priority) || (
