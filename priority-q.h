@@ -23,12 +23,12 @@ void enqueue(PriorityQueue *pq, const PriorityItem *value);
 /// @param pq
 /// @remark
 /// Dequeue item with most important priority
-PriorityItem dequeue(PriorityQueue *pq);
+void *dequeue(PriorityQueue *pq);
 
 /// @param pq
 /// @remark
 /// Peek item with most important priority without removing from queue
-PriorityItem peek(const PriorityQueue *pq);
+void *peek(const PriorityQueue *pq);
 
 /// @param pq
 /// @remark

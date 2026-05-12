@@ -90,24 +90,24 @@ void heapifyDown(PriorityQueue *pq, const int index) {
     }
 }
 
-PriorityItem dequeue(PriorityQueue *pq) {
+void *dequeue(PriorityQueue *pq) {
     if (!pq->size) {
         printf("Priority queue is empty\n");
-        return (PriorityItem){nullptr, -1};
+        return nullptr;
     }
 
     PriorityItem item = pq->items[0];
     pq->items[0] = pq->items[--pq->size];
     heapifyDown(pq, 0);
-    return item;
+    return item.value;
 }
 
-PriorityItem peek(const PriorityQueue *pq) {
+void *peek(const PriorityQueue *pq) {
     if (!pq->size) {
         printf("Priority queue is empty\n");
-        return (PriorityItem){nullptr, -1};
+        return nullptr;
     }
-    return pq->items[0];
+    return pq->items[0].value;
 }
 
 void free_item(PriorityItem *item) {

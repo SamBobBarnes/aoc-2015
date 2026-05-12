@@ -128,14 +128,21 @@ void day22_part1() {
     enqueue(q, new_pq_item(0, &initial_state));
 
     while (!is_empty(q)) {
-        // dequeue
-        // check if state results in loss or win
-        // if win
-        //   end
-        // else
-        //   enqueue each spell that is not already queued
-        // free effects
-        // free state
+        FightState *state = dequeue(q);
+        if (state->result == BossWin) continue;
+        if (state->result == PlayerWin) {
+            printf("%i mana used to defeat the boss with %i hp left", state->mana_used, state->player_hp);
+            break;
+        }
+
+        for (int i = 0; i < 5; i++)
+            for (int j = 0; j < state->effect_count; j++) {
+                if (state->effects[j].id == spells[i].id && state->effects[j].time_remaining > 0) continue;
+                enqueue_state(q, state, &spells[i]);
+            }
+
+        free(state->effects);
+        free(state);
     }
 
     free_content(q);
