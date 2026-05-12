@@ -11,25 +11,25 @@
 typedef struct {
     int visited_ids[8];
     int visited_count;
-} History;
+} D9History;
 
 typedef struct {
     int priority;
     int id;
-    History visited;
-} ItemPriority;
+    D9History visited;
+} D9ItemPriority;
 
 // Define PriorityQueue structure
 typedef struct {
-    ItemPriority items[MAX];
+    D9ItemPriority items[MAX];
     int size;
     bool inverse;
-} PriorityQueue;
+} D9PriorityQueue;
 
-void enqueue(PriorityQueue *pq, ItemPriority value);
+void enqueue(D9PriorityQueue *pq, D9ItemPriority value);
 
-ItemPriority dequeue(PriorityQueue *pq);
+D9ItemPriority dequeue(D9PriorityQueue *pq);
 
-ItemPriority peek(const PriorityQueue *pq);
+D9ItemPriority peek(const D9PriorityQueue *pq);
 
 #endif //AOC_2015_DAY9_PQ_H

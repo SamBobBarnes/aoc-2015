@@ -1,19 +1,18 @@
+﻿//
+// Created by sb17057 on 5/12/2026.
 //
-// Created by Samuel Barnes on 4/12/26.
-//
-#include <stdio.h>
-#include "day9-pq.h"
 
-// Define swap function to swap two integers
-void swap(D9ItemPriority *a, D9ItemPriority *b) {
-    D9ItemPriority temp = *a;
+#include "priority-q.h"
+
+#include <stdio.h>
+
+void swap(PriorityItem *a, PriorityItem *b) {
+    PriorityItem temp = *a;
     *a = *b;
     *b = temp;
 }
 
-// Define heapifyUp function to maintain heap property
-// during insertion
-void heapifyUp(D9PriorityQueue *pq, const int index) {
+void heapifyUp(PriorityQueue *pq, const int index) {
     if (index
         && ((!pq->inverse && pq->items[(index - 1) / 2].priority > pq->items[index].priority) || (
                 pq->inverse && pq->items[(index - 1) / 2].priority < pq->items[index].priority))) {
@@ -23,8 +22,7 @@ void heapifyUp(D9PriorityQueue *pq, const int index) {
     }
 }
 
-// Define enqueue function to add an item to the queue
-void enqueue(D9PriorityQueue *pq, const D9ItemPriority value) {
+void enqueue(PriorityQueue *pq, const PriorityItem value) {
     if (pq->size == MAX) {
         printf("Priority queue is full\n");
         return;
@@ -34,9 +32,7 @@ void enqueue(D9PriorityQueue *pq, const D9ItemPriority value) {
     heapifyUp(pq, pq->size - 1);
 }
 
-// Define heapifyDown function to maintain heap property
-// during deletion
-void heapifyDown(D9PriorityQueue *pq, const int index) {
+void heapifyDown(PriorityQueue *pq, const int index) {
     int smallest = index;
     int left = 2 * index + 1;
     int right = 2 * index + 2;
@@ -57,24 +53,22 @@ void heapifyDown(D9PriorityQueue *pq, const int index) {
     }
 }
 
-// Define dequeue function to remove an item from the queue
-D9ItemPriority dequeue(D9PriorityQueue *pq) {
+PriorityItem dequeue(PriorityQueue *pq) {
     if (!pq->size) {
         printf("Priority queue is empty\n");
-        return (D9ItemPriority){-1, -1};
+        return (PriorityItem){nullptr, -1};
     }
 
-    D9ItemPriority item = pq->items[0];
+    PriorityItem item = pq->items[0];
     pq->items[0] = pq->items[--pq->size];
     heapifyDown(pq, 0);
     return item;
 }
 
-// Define peek function to get the top item from the queue
-D9ItemPriority peek(const D9PriorityQueue *pq) {
+PriorityItem peek(const PriorityQueue *pq) {
     if (!pq->size) {
         printf("Priority queue is empty\n");
-        return (D9ItemPriority){-1, -1};
+        return (PriorityItem){nullptr, -1};
     }
     return pq->items[0];
 }

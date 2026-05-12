@@ -63,4 +63,6 @@ add_executable(aoc_2015 main.c
         debug.h
         debug.c
         libs/json.h
+        priority-q.c
+        priority-q.h
 )

@@ -139,9 +139,9 @@ void day9_part1() {
             routes[route_index].dest_id = j;
             routes[route_index].distance = INT_MAX;
 
-            PriorityQueue q = {{(ItemPriority){0, i, (History){{0}, 0}}}, 1, false};
+            D9PriorityQueue q = {{(D9ItemPriority){0, i, (D9History){{0}, 0}}}, 1, false};
             while (peek(&q).id != -1) {
-                const ItemPriority ip = dequeue(&q);
+                const D9ItemPriority ip = dequeue(&q);
                 const Node *city = &cities[ip.id];
 
                 if (debugging) {
@@ -161,7 +161,7 @@ void day9_part1() {
                     debug_ln("ending at %i dist", ip.priority);
                     break;
                 }
-                History node_history = ip.visited;
+                D9History node_history = ip.visited;
                 node_history.visited_ids[node_history.visited_count] = city->id;
                 node_history.visited_count++;
 
@@ -182,7 +182,7 @@ void day9_part1() {
 
                     debug_ln("enqueuing %s", cities[link->dest].name);
 
-                    enqueue(&q, (ItemPriority){ip.priority + link->distance, link->dest, node_history});
+                    enqueue(&q, (D9ItemPriority){ip.priority + link->distance, link->dest, node_history});
                 }
             }
 
