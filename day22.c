@@ -210,17 +210,20 @@ void day22_part1() {
         for (int i = 0; i < 5; i++) {
             bool can_add = true;
             for (int j = 0; j < state->effect_count; j++) {
-                if (state->effects[j].id == spells[i].id && state->effects[j].time_remaining > 0) can_add = false;
+                if (state->effects[j].id == spells[i].id && state->effects[j].time_remaining > 1) can_add = false;
             }
             if (can_add) {
                 FightState *fight_state = resolve_state(state, &spells[i]);
                 const int key = state_key(fight_state);
                 VisitedState *old_state = get_from_dict(&dict, key);
-                if (old_state != NULL && fight_state->result == NoWin && fight_state->mana_used < old_state->
-                    mana_used) {
-                    free(old_state);
-                    add_to_dict(&dict, key, create_visited_state(fight_state));
-                    enqueue(&q, new_pq_item(fight_state->mana_used, fight_state));
+                if (old_state != NULL && fight_state->result == NoWin) {
+                    if (fight_state->mana_used < old_state->mana_used) {
+                        free(old_state);
+                        add_to_dict(&dict, key, create_visited_state(fight_state));
+                        enqueue(&q, new_pq_item(fight_state->mana_used, fight_state));
+                    } else {
+                        free(fight_state);
+                    }
                 } else if (old_state == NULL) {
                     enqueue(&q, new_pq_item(fight_state->mana_used, fight_state));
                 }
@@ -229,8 +232,6 @@ void day22_part1() {
     }
     free(dict.entries);
     free_content(&q);
-
-    // 780 < x < 1362
 }
 
 void day22_part2() {
