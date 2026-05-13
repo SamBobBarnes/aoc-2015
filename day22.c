@@ -35,18 +35,21 @@ enum FightResult {
     NoWin
 };
 
-typedef struct {
-    uint8_t player_hp;
+typedef struct FightState FightState;
+
+struct FightState {
+    int player_hp;
     int player_mana;
     int mana_used;
-    uint8_t boss_hp;
-    uint8_t boss_dmg;
+    int boss_hp;
+    int boss_dmg;
     enum FightResult result;
-    uint8_t effect_count;
-    Effect *effects;
-} FightState;
+    int effect_count;
+    Effect effects[5];
+    FightState *prev;
+};
 
-FightState *enqueue_state(PriorityQueue *pq, const FightState *state, const Spell *spell) {
+FightState *resolve_state(FightState *state, const Spell *spell) {
     FightState *fight_state = malloc(sizeof(FightState));
     fight_state->player_hp = state->player_hp;
     fight_state->player_mana = state->player_mana;
@@ -55,52 +58,73 @@ FightState *enqueue_state(PriorityQueue *pq, const FightState *state, const Spel
     fight_state->boss_dmg = state->boss_dmg;
     fight_state->effect_count = 0;
     fight_state->result = NoWin;
+    fight_state->prev = state;
 
-    fight_state->effects = malloc((state->effect_count + 1) * sizeof(Effect));
+    if (spell->cost > fight_state->player_mana) {
+        // if casting would make us have negative mana, we lose
+        fight_state->result = BossWin;
+        return fight_state;
+    }
+
     //player turn
+
+    // evaluate existing effects
     for (int i = 0; i < state->effect_count; i++) {
         if (state->effects[i].time_remaining == 0) {
-            // spell has no effect if it has no more duration
+            // spell falls off if duration is 0
             continue;
         }
-        fight_state->boss_hp -= state->effects[i].dmg;
-        fight_state->player_mana += state->effects[i].recharge;
 
-        fight_state->effects[fight_state->effect_count] = state->effects[i];
-        fight_state->effects[fight_state->effect_count++].time_remaining--;
+        fight_state->boss_hp -= state->effects[i].dmg; // evaluate effect damage
+        fight_state->player_mana += state->effects[i].recharge; // evaluate effect mana gain
+
+        if (state->effects[i].time_remaining - 1 == 0) {
+            // spell falls off if duration is 0
+            continue;
+        }
+
+        fight_state->effects[fight_state->effect_count] = state->effects[i]; // add effect to next state
+        fight_state->effects[fight_state->effect_count++].time_remaining--; // decrease effect duration
     }
 
-    if (!spell->instant) {
+    if (spell->instant) {
+        // evaluate instant
+        fight_state->player_hp += spell->heal; // heal with instant
+        fight_state->boss_hp -= spell->damage; // deal damage with instant
+    } else {
         fight_state->effects[fight_state->effect_count++] = (Effect){
+            // if spell is not an instant, store the effect
             spell->id, spell->duration, spell->damage, spell->armor, spell->recharge
         };
-    } else {
-        fight_state->player_hp += spell->heal;
-        fight_state->boss_hp -= spell->damage;
     }
-    fight_state->mana_used += spell->cost;
+
+    // evaluate spell cost
+    fight_state->mana_used += spell->cost; // add cost to mana used
+    fight_state->player_mana -= spell->cost; // remove used mana
 
     int armor = 0;
+
     // boss turn
 
     // apply other effects
     for (int i = 0; i < fight_state->effect_count; i++) {
-        fight_state->boss_hp -= fight_state->effects[i].dmg;
-        fight_state->player_mana += fight_state->effects[i].recharge;
-        armor += fight_state->effects[i].armor;
+        fight_state->boss_hp -= fight_state->effects[i].dmg; // damage boss with effect
+        fight_state->player_mana += fight_state->effects[i].recharge; // evaluate recharge
+        armor += fight_state->effects[i].armor; // evaluate shield
+        fight_state->effects[i].time_remaining--;
     }
 
     if (fight_state->boss_hp <= 0) {
+        // if player has dealt a killing blow
         fight_state->result = PlayerWin;
         return fight_state; // player wins
     }
-    fight_state->player_hp -= fight_state->boss_dmg - armor;
+    fight_state->player_hp -= fight_state->boss_dmg - armor; // damage player
     if (fight_state->player_hp <= 0) {
+        // if boss has dealt killing blow
         fight_state->result = BossWin;
         return fight_state; // player loses
     }
-
-    enqueue(pq, new_pq_item(fight_state->mana_used, fight_state));
 
     return fight_state; // noone has died
 }
@@ -108,11 +132,17 @@ FightState *enqueue_state(PriorityQueue *pq, const FightState *state, const Spel
 void day22_part1() {
     print_header(22, 1);
 
-    uint8_t boss_hp = 13; //todo: update for actual input
-    uint8_t boss_dmg = 8;
+    // int boss_hp = 14;
+    // int boss_dmg = 8;
+    //
+    // int player_hp = 10;
+    // int player_mana = 250;
 
-    uint8_t player_hp = 10; // todo: update for actual input
-    int player_mana = 250;
+    int boss_hp = 58;
+    int boss_dmg = 9;
+
+    int player_hp = 50;
+    int player_mana = 500;
 
     Spell spells[5] = {
         {0, 53, true, 4}, // magic missile
@@ -124,7 +154,7 @@ void day22_part1() {
 
     FightState initial_state = (FightState){player_hp, player_mana, 0, boss_hp, boss_dmg, NoWin, 0};
 
-    PriorityQueue q = create_priority_queue(100000, false);
+    PriorityQueue q = create_priority_queue(1000000, false);
 
     enqueue(&q, new_pq_item(0, &initial_state));
 
@@ -141,13 +171,15 @@ void day22_part1() {
             for (int j = 0; j < state->effect_count; j++) {
                 if (state->effects[j].id == spells[i].id && state->effects[j].time_remaining > 0) can_add = false;
             }
-            if (can_add)
-                enqueue_state(&q, state, &spells[i]);
+            if (can_add) {
+                FightState *fight_state = resolve_state(state, &spells[i]);
+                enqueue(&q, new_pq_item(fight_state->mana_used, fight_state));
+            }
         }
-
-        free(state->effects);
     }
     free_content(&q);
+
+    // 780 < x < 1415
 }
 
 void day22_part2() {
