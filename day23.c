@@ -5,6 +5,7 @@
 #include "day23.h"
 #include "Inputs/day23.h"
 
+#include <stdint.h>
 #include <string.h>
 
 enum Instruction {
@@ -135,8 +136,99 @@ void day23_part1() {
 
 void day23_part2() {
     print_header(23, 2);
-    const char *input = day23_input.test_input;
+    const char *input = day23_input.input;
     const size_t len = strlen(input);
+
+    int max_row_size = 0;
+    int row_count = GetRowCount(input, len, &max_row_size);
+    char rows[row_count][max_row_size];
+    SplitIntoRows(input, len, row_count, max_row_size, rows);
+
+    // two registers
+    // 6 instructions
+    //    hlf r - halve register
+    //    tpl r - triple register
+    //    inc r - increment register
+    //    jmp offset - jump to current instr + offset
+    //    jie r, offset - jump if even
+    //    jio r, offset - jump if odd
+
+    Instruction instructions[row_count];
+
+    for (int i = 0; i < row_count; i++) {
+        char instr[4] = "";
+        char reg[2] = "";
+        char offset[5] = "";
+        strncpy(instr, rows[i], 3);
+        instructions[i].type = get_instruction(instr);
+
+        strncpy(reg, rows[i] + 4, 1);
+        if (rows[i][4] == 'a')
+            instructions[i].reg = A;
+        else if (rows[i][4] == 'b')
+            instructions[i].reg = B;
+        else
+            strcpy(offset, rows[i] + 4);
+
+
+        if (rows[i][5] == ',')
+            strcpy(offset, rows[i] + 7);
+
+        if (strcmp(offset, "") != 0)
+            instructions[i].offset = atoi(offset);
+    }
+
+    uint64_t regA = 1;
+    uint64_t regB = 0;
+    int index = 0;
+    uint64_t *reg = NULL;
+    while (index < row_count) {
+        if (index == 38) print_ln("%i, %i", regA, regB);
+        switch (instructions[index].reg) {
+            case A:
+                reg = &regA;
+                break;
+            case B:
+                reg = &regB;
+                break;
+            default:
+                reg = NULL;
+        }
+        switch (instructions[index].type) {
+            case HLF:
+                *reg = *reg / 2;
+                break;
+            case TPL:
+                *reg = *reg * 3;
+                break;
+            case INC:
+                (*reg)++;
+                break;
+            case JMP:
+                index += instructions[index].offset;
+                continue;
+                break;
+            case JIE:
+                if (*reg % 2 == 0) {
+                    index += instructions[index].offset;
+                    continue;
+                }
+                break;
+            case JIO:
+                if (*reg == 1) {
+                    index += instructions[index].offset;
+                    continue;
+                }
+                break;
+            default:
+                printf("TILT");
+                exit(1);
+        }
+        index++;
+    }
+
+    // x < 186643952
+    print_ln("Reg A: %i\nReg B: %i", regA, regB);
 }
 
 IDay day23 = {
