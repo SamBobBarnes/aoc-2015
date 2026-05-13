@@ -110,6 +110,8 @@ void day24_part1() {
                 }
             }
 
+    debug_ln("%i sets created", set_count);
+
     // order sets by length, entanglement
 
     bool sorted = false;
