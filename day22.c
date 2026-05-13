@@ -85,11 +85,18 @@ VisitedState *create_visited_state(FightState *state) {
     return visited;
 }
 
-FightState *resolve_state(FightState *state, Spell *spell) {
+FightState *resolve_state(FightState *state, Spell *spell, const bool handicap) {
     FightState *fight_state = duplicate_fight_state(state);
     fight_state->spell = spell;
 
     //player turn
+
+    if (handicap) fight_state->player_hp--;
+
+    if (fight_state->player_hp <= 0) {
+        fight_state->result = BossWin;
+        return fight_state;
+    }
 
     // evaluate existing effects
     for (int i = 0; i < state->effect_count; i++) {
@@ -213,7 +220,7 @@ void day22_part1() {
                 if (state->effects[j].id == spells[i].id && state->effects[j].time_remaining > 1) can_add = false;
             }
             if (can_add) {
-                FightState *fight_state = resolve_state(state, &spells[i]);
+                FightState *fight_state = resolve_state(state, &spells[i], false);
                 const int key = state_key(fight_state);
                 VisitedState *old_state = get_from_dict(&dict, key);
                 if (old_state != NULL && fight_state->result == NoWin) {
@@ -236,8 +243,66 @@ void day22_part1() {
 
 void day22_part2() {
     print_header(22, 2);
-    const char *input = day22_input.test_input;
-    const size_t len = strlen(input);
+
+    int boss_hp = 58;
+    int boss_dmg = 9;
+
+    int player_hp = 50;
+    int player_mana = 500;
+
+    Spell spells[5] = {
+        {0, 53, true, 4}, // magic missile
+        {1, 73, true, 2, 0, 0, 2}, // drain
+        {2, 113, false, 0, 7, 0, 0, 6}, // shield
+        {3, 173, false, 3, 0, 0, 0, 6}, // poison
+        {4, 229, false, 0, 0, 101, 0, 5} // recharge
+    };
+
+    Dictionary dict = create_dictionary(100000);
+
+    FightState initial_state = (FightState){player_hp, player_mana, 0, boss_hp, boss_dmg, NoWin, 0};
+    VisitedState visited_state = {
+        initial_state.player_hp, initial_state.boss_hp, initial_state.player_mana, &initial_state
+    };
+    add_to_dict(&dict, state_key(&initial_state), &visited_state);
+
+    PriorityQueue q = create_priority_queue(1000000, false);
+
+    enqueue(&q, new_pq_item(0, &initial_state));
+
+    while (!is_empty(&q)) {
+        FightState *state = dequeue(&q);
+        if (state->result == BossWin) continue;
+        if (state->result == PlayerWin) {
+            printf("%i mana used to defeat the boss with %i hp left", state->mana_used, state->player_hp);
+            break;
+        }
+
+        for (int i = 0; i < 5; i++) {
+            bool can_add = true;
+            for (int j = 0; j < state->effect_count; j++) {
+                if (state->effects[j].id == spells[i].id && state->effects[j].time_remaining > 1) can_add = false;
+            }
+            if (can_add) {
+                FightState *fight_state = resolve_state(state, &spells[i], true);
+                const int key = state_key(fight_state);
+                VisitedState *old_state = get_from_dict(&dict, key);
+                if (old_state != NULL && fight_state->result == NoWin) {
+                    if (fight_state->mana_used < old_state->mana_used) {
+                        free(old_state);
+                        add_to_dict(&dict, key, create_visited_state(fight_state));
+                        enqueue(&q, new_pq_item(fight_state->mana_used, fight_state));
+                    } else {
+                        free(fight_state);
+                    }
+                } else if (old_state == NULL) {
+                    enqueue(&q, new_pq_item(fight_state->mana_used, fight_state));
+                }
+            }
+        }
+    }
+    free(dict.entries);
+    free_content(&q);
 }
 
 IDay day22 = {
