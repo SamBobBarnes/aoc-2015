@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "dictionary.h"
 #include "priority-q.h"
 
 typedef struct {
@@ -46,10 +47,18 @@ struct FightState {
     enum FightResult result;
     int effect_count;
     Effect effects[5];
+    Spell *spell;
     FightState *prev;
 };
 
-FightState *resolve_state(FightState *state, const Spell *spell) {
+typedef struct {
+    int player_hp;
+    int boss_hp;
+    int mana_used;
+    FightState *state;
+} VisitedState;
+
+FightState *duplicate_fight_state(FightState *state) {
     FightState *fight_state = malloc(sizeof(FightState));
     fight_state->player_hp = state->player_hp;
     fight_state->player_mana = state->player_mana;
@@ -59,12 +68,26 @@ FightState *resolve_state(FightState *state, const Spell *spell) {
     fight_state->effect_count = 0;
     fight_state->result = NoWin;
     fight_state->prev = state;
+    return fight_state;
+}
 
-    if (spell->cost > fight_state->player_mana) {
-        // if casting would make us have negative mana, we lose
-        fight_state->result = BossWin;
-        return fight_state;
-    }
+int state_key(const FightState *state) {
+    return state->player_hp * 100 + state->boss_hp;
+}
+
+VisitedState *create_visited_state(FightState *state) {
+    VisitedState *visited = malloc(sizeof(VisitedState));
+    visited->player_hp = state->player_hp;
+    visited->boss_hp = state->boss_hp;
+    visited->mana_used = state->mana_used;
+    visited->state = state;
+
+    return visited;
+}
+
+FightState *resolve_state(FightState *state, Spell *spell) {
+    FightState *fight_state = duplicate_fight_state(state);
+    fight_state->spell = spell;
 
     //player turn
 
@@ -85,6 +108,18 @@ FightState *resolve_state(FightState *state, const Spell *spell) {
 
         fight_state->effects[fight_state->effect_count] = state->effects[i]; // add effect to next state
         fight_state->effects[fight_state->effect_count++].time_remaining--; // decrease effect duration
+    }
+
+    if (fight_state->boss_hp <= 0) {
+        // if player has dealt a killing blow
+        fight_state->result = PlayerWin;
+        return fight_state; // player wins
+    }
+
+    if (spell->cost > fight_state->player_mana) {
+        // if casting would make us have negative mana, we lose
+        fight_state->result = BossWin;
+        return fight_state;
     }
 
     if (spell->instant) {
@@ -152,7 +187,13 @@ void day22_part1() {
         {4, 229, false, 0, 0, 101, 0, 5} // recharge
     };
 
+    Dictionary dict = create_dictionary(100000);
+
     FightState initial_state = (FightState){player_hp, player_mana, 0, boss_hp, boss_dmg, NoWin, 0};
+    VisitedState visited_state = {
+        initial_state.player_hp, initial_state.boss_hp, initial_state.player_mana, &initial_state
+    };
+    add_to_dict(&dict, state_key(&initial_state), &visited_state);
 
     PriorityQueue q = create_priority_queue(1000000, false);
 
@@ -173,13 +214,23 @@ void day22_part1() {
             }
             if (can_add) {
                 FightState *fight_state = resolve_state(state, &spells[i]);
-                enqueue(&q, new_pq_item(fight_state->mana_used, fight_state));
+                const int key = state_key(fight_state);
+                VisitedState *old_state = get_from_dict(&dict, key);
+                if (old_state != NULL && fight_state->result == NoWin && fight_state->mana_used < old_state->
+                    mana_used) {
+                    free(old_state);
+                    add_to_dict(&dict, key, create_visited_state(fight_state));
+                    enqueue(&q, new_pq_item(fight_state->mana_used, fight_state));
+                } else if (old_state == NULL) {
+                    enqueue(&q, new_pq_item(fight_state->mana_used, fight_state));
+                }
             }
         }
     }
+    free(dict.entries);
     free_content(&q);
 
-    // 780 < x < 1415
+    // 780 < x < 1362
 }
 
 void day22_part2() {

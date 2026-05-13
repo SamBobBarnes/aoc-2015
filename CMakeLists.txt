@@ -65,4 +65,6 @@ add_executable(aoc_2015 main.c
         libs/json.h
         priority-q.c
         priority-q.h
+        dictionary.c
+        dictionary.h
 )
