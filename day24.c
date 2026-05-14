@@ -77,8 +77,26 @@ void day24_part1() {
 
 void day24_part2() {
     print_header(24, 2);
-    const char *input = day24_input.test_input;
+    const char *input = day24_input.input;
     const size_t len = strlen(input);
+
+    int max_row_size = 0;
+    int count = GetRowCount(input, len, &max_row_size);
+    char rows[count][max_row_size];
+    SplitIntoRows(input, len, count, max_row_size, rows);
+
+    int pkgs[count];
+    // int index = 0;
+    // for (int i = count - 1; i >= 0; i--)
+    //     pkgs[index++] = atoi(rows[i]);
+    for (int i = 0; i < count; i++)
+        pkgs[i] = atoi(rows[i]);
+
+    int total = get_pkg_total(pkgs, count);
+    int split = total / 4;
+    debug_ln("%i must be split into groups of %i", total, split);
+
+    printf("%lld is the smallest qe", recurse_pkgs(pkgs, count, 0, split, (Stack){1, 0}).qe);
 }
 
 IDay day24 = {
