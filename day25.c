@@ -30,11 +30,10 @@ void day25_part1() {
 
     uint64_t current_val = 20151125;
     Point current = {1, 1};
-    while (current.x != goal.x && current.y != goal.y) {
+    while (current.x != goal.x || current.y != goal.y) {
         current = next_point(current);
         current_val = calculate_next(current_val);
     }
-    // 6483627 < x < 22512812
     print_ln("code is %lld", current_val);
 }
 
